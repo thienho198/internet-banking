@@ -15,16 +15,19 @@ exports.postCreateCustomer = (req, res, next) => {
   paymentAccount
     .save()
     .then((account) => {
-      return bcrypt.hash(password, 12).then((hashedPassword) => {
-        const customer = new Customer({
-          name: name,
-          email: email,
-          paymentAccountId: account._id,
-          phoneNumber: phoneNumber,
-          password: hashedPassword,
-        });
-        return customer.save();
-      });
+      return bcrypt
+        .hash(password, 12)
+        .then((hashedPassword) => {
+          const customer = new Customer({
+            name: name,
+            email: email,
+            paymentAccountId: account._id,
+            phoneNumber: phoneNumber,
+            password: hashedPassword,
+          });
+          return customer.save();
+        })
+        .catch((err) => console.log(err));
     })
     .then(() => {
       res.json({ success: true });
