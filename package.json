@@ -1,0 +1,23 @@
+{
+  "name": "webnc-internetbanking",
+  "version": "1.0.0",
+  "description": "banking",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon app.js"
+  },
+  "author": "thienho-ngochien-baochau",
+  "license": "ISC",
+  "devDependencies": {
+    "nodemon": "^2.0.3"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "body-parser": "^1.19.0",
+    "creditcard-generator": "0.0.7",
+    "express": "^4.17.1",
+    "mongodb": "^3.5.7",
+    "mongoose": "^5.9.13"
+  }
+}
