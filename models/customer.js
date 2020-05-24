@@ -24,6 +24,12 @@ const customerSchema = new Schema({
     ref: "PaymentAccount",
     require: true,
   },
+  listDeptReminders: [{
+    deptReminderId : {
+      type: Schema.Types.ObjectId,
+      require: true
+    }
+  }]
 });
 
 module.exports = mongoose.model("Customer", customerSchema);

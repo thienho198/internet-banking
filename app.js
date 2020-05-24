@@ -11,8 +11,9 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
 const customerRoutes = require("./routes/customer");
+const deptReminderRoutes = require("./routes/deptReminder");
 
-app.use(customerRoutes);
+app.use(customerRoutes, deptReminderRoutes);
 
 mongoose
   .connect(MONGODB_URI)

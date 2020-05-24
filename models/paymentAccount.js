@@ -6,6 +6,7 @@ const paymentAccountSchema = new Schema({
   stk: {
     type: Schema.Types.String,
     require: true,
+    unique: true
   },
   balance: {
     type: Schema.Types.Number,
