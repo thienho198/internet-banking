@@ -27,7 +27,8 @@ const customerSchema = new Schema({
   listDeptReminders: [{
     deptReminderId : {
       type: Schema.Types.ObjectId,
-      require: true
+      require: true,
+      ref: "DeptReminder"
     }
   }]
 });
