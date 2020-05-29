@@ -3,7 +3,7 @@ const bcrypt = require("bcryptjs");
 
 const PaymentAccount = require("../models/paymentAccount");
 const Customer = require("../models/customer");
-
+const paymentController = require('../controllers/paymentController');
 
 exports.getListDeptReminderWasRemined = (req, res, next)=>{
   const customerId = req.query.id;
@@ -83,3 +83,18 @@ exports.postCreateCustomer = (req, res, next) => {
       res.json({ success: false });
     });
 };
+
+exports.addMoneyByEmail = async(req,res, next)=>{
+  const {email, amountOfMoney} = req.body;
+  try{
+    const customer = await Customer.findOne({email:email});
+  const customerPopulateAccountPM = await customer.populate('paymentAccountId').execPopulate();;
+  console.log(customerPopulateAccountPM);
+  const stk = customerPopulateAccountPM.paymentAccountId.stk;
+  paymentController.addMoneyByStk({body:{stk:stk,amountOfMoney:amountOfMoney}}, res );
+  }
+  catch(err) {
+    res.status(400).json({ success: true, message:'server error'})
+  }
+}
+

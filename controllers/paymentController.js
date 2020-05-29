@@ -30,3 +30,17 @@ exports.getCustomerByPaymentAccount = (req, res, next) => {
         })
         .catch(err => console.log(err));
 }
+
+exports.addMoneyByStk =  async (req, res,next)=>{
+    const {stk, amountOfMoney} = req.body;
+    try {
+        const paymentAccount = await PaymentAccount.findOne({stk:stk});
+    paymentAccount.balance = paymentAccount.balance + amountOfMoney ;
+    await paymentAccount.save();
+    res.status(200).json({ success: true, currentBalance: paymentAccount.balance})
+    }
+    catch(err){
+        console.log(err);
+        res.status(400).json({ success: false, message:'server error'})
+    }
+  }

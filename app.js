@@ -19,6 +19,6 @@ app.use(customerRoutes, deptReminderRoutes, paymentRoutes);
 mongoose
   .connect(MONGODB_URI)
   .then(() => {
-    app.listen(3000);
+    app.listen(4000);
   })
   .catch((err) => console(err));
