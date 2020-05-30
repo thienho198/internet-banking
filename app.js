@@ -1,24 +1,19 @@
-const express = require("express");
-const bodyParser = require("body-parser");
-const mongoose = require("mongoose");
+const express = require('express');
+const dotenv = require('dotenv');
+const connectDB = require('./config/db');
 
-const MONGODB_URI =
-  "mongodb+srv://ho:yUaWyeDwbXcIOpNl@cluster0-voj2r.mongodb.net/internet-banking";
+//Load env vars
+dotenv.config({ path: './config/config.env' });
 
 const app = express();
 
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(bodyParser.json());
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
 
-const customerRoutes = require("./routes/customer");
-const deptReminderRoutes = require("./routes/deptReminder");
+const customerRoutes = require('./routes/customer');
+const deptReminderRoutes = require('./routes/deptReminder');
 const paymentRoutes = require('./routes/payment');
 
 app.use(customerRoutes, deptReminderRoutes, paymentRoutes);
-
-mongoose
-  .connect(MONGODB_URI)
-  .then(() => {
-    app.listen(3000);
-  })
-  .catch((err) => console(err));
+connectDB();
+app.listen(3000);
