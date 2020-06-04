@@ -16,7 +16,7 @@ exports.protectBank = async (req, res, next) => {
     console.log(req.body);
     const sig = req.headers.sig;
     const ts = req.headers.ts;
-    if (req.headers.identify !== process.env.HEADER_COMPANYID) {
+    if (req.headers.company_id !== process.env.HEADER_COMPANYID) {
       return res.status(401).json({ err: 'Wrong input identify' });
     }
     if (Date.now() - ts > 600000) {
