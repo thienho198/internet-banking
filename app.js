@@ -17,4 +17,5 @@ const bankRoutes = require('./routes/bank');
 
 app.use(customerRoutes, deptReminderRoutes, paymentRoutes, bankRoutes);
 connectDB();
-app.listen(3000);
+var PORT = process.env.PORT || 3000;
+app.listen(PORT);
