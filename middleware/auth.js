@@ -19,6 +19,9 @@ exports.protectBank = async (req, res, next) => {
     if (req.headers.identify !== process.env.HEADER_IDENTIFY) {
       return res.status(401).json({ err: 'Wrong input identify' });
     }
+    if (Date.now() - ts > 600000) {
+      return res.status(401).json({ err: 'Time expire' });
+    }
     let checkSig = md5(req.body + ts + process.env.SECRET_KEY);
     if (checkSig !== sig) {
       return res.status(401).json({ err: 'Wrong sig' });

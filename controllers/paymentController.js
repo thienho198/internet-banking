@@ -35,7 +35,7 @@ exports.getCustomerByPaymentAccount = (req, res, next) => {
 */
 
 exports.getCustomerByPaymentAccount = async (req, res, next) => {
-  const stk = req.query.stk;
+  const stk = req.body.stk;
   const paymentAccount = await PaymentAccount.findOne({ stk: stk }).populate(
     'customer'
   );
