@@ -9,14 +9,14 @@ exports.protect = (req, res, next) => {
 
 //Verify outter bank
 exports.protectBank = async (req, res, next) => {
-  if (!req.headers.identify) {
+  if (!req.headers.company_id) {
     protect(req, res, next);
   } else {
     const { stk } = req.body;
     console.log(req.body);
     const sig = req.headers.sig;
     const ts = req.headers.ts;
-    if (req.headers.identify !== process.env.HEADER_IDENTIFY) {
+    if (req.headers.identify !== process.env.HEADER_COMPANYID) {
       return res.status(401).json({ err: 'Wrong input identify' });
     }
     if (Date.now() - ts > 600000) {
