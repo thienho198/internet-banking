@@ -13,7 +13,8 @@ app.use(express.urlencoded({ extended: false }));
 const customerRoutes = require('./routes/customer');
 const deptReminderRoutes = require('./routes/deptReminder');
 const paymentRoutes = require('./routes/payment');
+const bankRoutes = require('./routes/bank');
 
-app.use(customerRoutes, deptReminderRoutes, paymentRoutes);
+app.use(customerRoutes, deptReminderRoutes, paymentRoutes, bankRoutes);
 connectDB();
 app.listen(3000);

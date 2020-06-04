@@ -1,8 +1,10 @@
 const PaymentAccount = require('../models/paymentAccount');
 const Customer = require('../models/customer');
 
+/*
 exports.getCustomerByPaymentAccount = (req, res, next) => {
   const stk = req.query.stk;
+  console.log(stk);
   PaymentAccount.findOne({ stk: stk })
     .then((paymentAccount) => {
       return paymentAccount.populate('Customer').execPopulate();
@@ -15,7 +17,7 @@ exports.getCustomerByPaymentAccount = (req, res, next) => {
         .exec((err, customer) => {
           if (err) {
             res.status(400).json({
-              sesult: 'fail',
+              result: 'fail',
               data: {},
               message: err,
             });
@@ -30,8 +32,29 @@ exports.getCustomerByPaymentAccount = (req, res, next) => {
     })
     .catch((err) => console.log(err));
 };
+*/
+
+exports.getCustomerByPaymentAccount = async (req, res, next) => {
+  const stk = req.query.stk;
+  const paymentAccount = await PaymentAccount.findOne({ stk: stk }).populate(
+    'customer'
+  );
+  if (!paymentAccount) {
+    res.status(404).json({ success: false, mes: 'account not found' });
+  }
+  const customer = await Customer.findOne({
+    paymentAccountId: paymentAccount._id,
+  }).select({
+    name: 1,
+  });
+  if (!customer) {
+    res.status(404).json({ success: false, mes: 'customer not found' });
+  }
+  res.status(200).json({ success: true, data: customer, msg: 'found' });
+};
 
 exports.getAll = async (req, res, next) => {
+  console.log(req.body);
   try {
     const accounts = await PaymentAccount.find();
     res.status(200).json({ success: true, data: accounts });
@@ -41,19 +64,7 @@ exports.getAll = async (req, res, next) => {
 };
 
 exports.getAccount = async (req, res, next) => {
-  const stk = req.params.stk;
-  const account = await PaymentAccount.findOne({ stk: stk });
-  if (!account) {
-    return res.status(404).json({ success: false });
-  }
-  res.status(200).json({ success: true, yourAccount: { account } });
-};
-
-exports.getOutterAccount = async (req, res, next) => {
-  const { id, stk } = req.body;
-  console.log(req.body);
-  console.log(req.headers.identify);
-  const account = await PaymentAccount.findOne({ stk: stk });
+  const account = await PaymentAccount.findById(req.params.id);
   if (!account) {
     return res.status(404).json({ success: false });
   }

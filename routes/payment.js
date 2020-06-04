@@ -5,10 +5,11 @@ const router = express.Router();
 
 router.get(
   '/payment/getCustomer',
+  protectBank,
   paymentController.getCustomerByPaymentAccount
 );
-router.get('/payment/:stk', protect, paymentController.getAccount);
-router.get('/allPayment', protect, paymentController.getAll);
-router.get('/outterAccount', protectBank, paymentController.getOutterAccount);
-router.post('/payment/addMoney', protect, paymentController.addMoneyByStk);
+router.get('/payment/allPayment', protect, paymentController.getAll);
+router.post('/payment/addMoney', protectBank, paymentController.addMoneyByStk);
+router.get('/payment/:id', protect, paymentController.getAccount);
+
 module.exports = router;
