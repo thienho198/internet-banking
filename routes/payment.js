@@ -3,7 +3,7 @@ var paymentController = require('../controllers/paymentController');
 const { protect, protectBank } = require('../middleware/auth');
 const router = express.Router();
 
-router.get(
+router.post(
   '/payment/getCustomer',
   protectBank,
   paymentController.getCustomerByPaymentAccount
