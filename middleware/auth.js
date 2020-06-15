@@ -53,10 +53,11 @@ exports.protectKey = async (req, res, next) => {
     console.log('check' + check);
     if (check) {
       next();
+    } else {
+      return res
+        .status(401)
+        .json({ err: 'Wrong verify. You dont allow to access' });
     }
-    return res
-      .status(401)
-      .json({ err: 'Wrong verify. You dont allow to access' });
   } catch (error) {
     console.log(error);
     return res.status(400).json({ err: error });
