@@ -37,15 +37,15 @@ exports.rgpAddMoneyByStk = async (req, res, next) => {
     console.log(paymentAccount.balance);
     await paymentAccount.save();
     let obj = { success: true };
-    responsePgp(obj, 202);
+    responsePgp(res, obj, 202);
   } catch (err) {
     let obj = { success: false };
     console.log(err);
-    responsePgp(obj, 400);
+    responsePgp(res, obj, 400);
   }
 };
 
-const responsePgp = async (obj, status) => {
+const responsePgp = async (res, obj, status) => {
   const {
     keys: [privateKey],
   } = await openpgp.key.readArmored(constant.BANK_PRIVATE_KEY);
