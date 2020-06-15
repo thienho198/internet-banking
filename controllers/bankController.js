@@ -2,6 +2,7 @@ const axios = require('axios');
 const md5 = require('md5');
 const PaymentAccount = require('../models/paymentAccount');
 const openpgp = require('openpgp');
+const constant = require('../config/env');
 exports.getRgpBank = async (req, res, next) => {
   try {
     console.log(req.body);
@@ -47,8 +48,8 @@ exports.rgpAddMoneyByStk = async (req, res, next) => {
 const responsePgp = async (obj, status) => {
   const {
     keys: [privateKey],
-  } = await openpgp.key.readArmored(process.env.BANK_PRIVATE_KEY);
-  await privateKey.decrypt(process.env.PASSPHRASE);
+  } = await openpgp.key.readArmored(constant.BANK_PRIVATE_KEY);
+  await privateKey.decrypt(constant.PASSPHRASE);
   let object = JSON.stringify(obj);
   const { data: cleartext } = await openpgp.sign({
     message: openpgp.cleartext.fromText(object), // CleartextMessage or Message object
