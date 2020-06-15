@@ -5,9 +5,11 @@ const md5 = require('md5');
 const crypto = require('crypto');
 const openpgp = require('openpgp');
 const { response } = require('express');
+const constant = require('../config/env');
 
 exports.protect = async (req, res, next) => {
   let token;
+  console.log(constant.RGP_PUBLICKEY);
   if (req.headers.authorization) {
     token = req.headers.authorization;
   }
@@ -42,12 +44,12 @@ exports.protectKey = async (req, res, next) => {
   try {
     let data = JSON.stringify(req.body.data);
     let signature = req.body.signature;
-    console.log('data: ' + req.body.data);
+    console.log('data: ' + data);
     console.log('sig: ' + req.body.signature);
     const verify = crypto.createVerify('SHA256');
     verify.write(data);
     verify.end();
-    let check = verify.verify(process.env.RGP_PUBLICKEY, signature, 'hex');
+    let check = verify.verify(constant.RGP_PUBLICKEY, signature, 'hex');
     console.log('check' + check);
     if (check) {
       next();
