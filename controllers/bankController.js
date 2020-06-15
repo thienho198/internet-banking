@@ -27,10 +27,12 @@ exports.getRgpBank = async (req, res, next) => {
 
 exports.rgpAddMoneyByStk = async (req, res, next) => {
   const { stk, amountOfMoney } = req.body.data;
-  console.log(req.body.data);
+  console.log(stk);
   try {
     const paymentAccount = await PaymentAccount.findOne({ stk: stk });
+    console.log(paymentAccount);
     paymentAccount.balance = paymentAccount.balance + amountOfMoney;
+    console.log(paymentAccount.balance);
     await paymentAccount.save();
     let obj = { success: true };
     responsePgp(obj, 202);
