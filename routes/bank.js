@@ -9,12 +9,16 @@ const router = express.Router();
 
 router.post('/bank/checkRgpCustomer', bankController.getRgpBank);
 
-router.post('/bank/getCustomer', protectBank, bankController.rgpAddMoneyByStk);
-
 router.post(
   '/bank/rgpTransferMoney',
   protectBank,
   protectKey,
-  paymentController.addMoneyByStk
+  bankController.rgpAddMoneyByStk
+);
+
+router.post(
+  '/bank/rgpGetCustomer',
+  protectBank,
+  paymentController.getCustomerByPaymentAccount
 );
 module.exports = router;
