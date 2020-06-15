@@ -1,6 +1,7 @@
 const axios = require('axios');
 const md5 = require('md5');
 const PaymentAccount = require('../models/paymentAccount');
+const openpgp = require('openpgp');
 exports.getRgpBank = async (req, res, next) => {
   try {
     console.log(req.body);
