@@ -39,18 +39,23 @@ exports.protectBank = async (req, res, next) => {
 };
 
 exports.protectKey = async (req, res, next) => {
-  let data = JSON.stringify(req.body.data);
-  let signature = req.body.signature;
-  const verify = crypto.createVerify('SHA256');
-  verify.write(data);
-  verify.end();
-  let check = verify.verify(process.env.RGP_PUBLICKEY, sig, 'hex');
-  if (check) {
-    next();
+  try {
+    let data = JSON.stringify(req.body.data);
+    let signature = req.body.signature;
+    const verify = crypto.createVerify('SHA256');
+    verify.write(data);
+    verify.end();
+    let check = verify.verify(process.env.RGP_PUBLICKEY, sig, 'hex');
+    if (check) {
+      next();
+    }
+    return res
+      .status(401)
+      .json({ err: 'Wrong verify. You dont allow to access' });
+  } catch (error) {
+    console.log(error);
+    return res.status(400).json({ err: error });
   }
-  return res
-    .status(401)
-    .json({ err: 'Wrong verify. You dont allow to access' });
 };
 
 const protectBank = async (req, res, next) => {
