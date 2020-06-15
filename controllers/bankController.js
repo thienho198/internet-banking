@@ -1,5 +1,6 @@
 const axios = require('axios');
 const md5 = require('md5');
+const PaymentAccount = require('../models/paymentAccount');
 exports.getRgpBank = async (req, res, next) => {
   try {
     console.log(req.body);
@@ -22,4 +23,35 @@ exports.getRgpBank = async (req, res, next) => {
     res.json({ success: false });
     console.error(error);
   }
+};
+
+exports.rgpAddMoneyByStk = async (req, res, next) => {
+  const { stk, amountOfMoney } = req.body.data;
+  try {
+    const paymentAccount = await PaymentAccount.findOne({ stk: stk });
+    paymentAccount.balance = paymentAccount.balance + amountOfMoney;
+    await paymentAccount.save();
+    let obj = { success: true };
+    responsePgp(obj, 202);
+  } catch (err) {
+    let obj = { success: false };
+    console.log(err);
+    responsePgp(obj, 400);
+  }
+};
+
+const responsePgp = async (obj, status) => {
+  const {
+    keys: [privateKey],
+  } = await openpgp.key.readArmored(process.env.BANK_PRIVATE_KEY);
+  await privateKey.decrypt(process.env.PASSPHRASE);
+  let object = JSON.stringify(obj);
+  const { data: cleartext } = await openpgp.sign({
+    message: openpgp.cleartext.fromText(object), // CleartextMessage or Message object
+    privateKeys: [privateKey], // for signing
+  });
+  const response = {
+    cleartext: cleartext,
+  };
+  res.status(status).json(response);
 };

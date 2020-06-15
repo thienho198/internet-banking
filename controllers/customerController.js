@@ -135,29 +135,3 @@ const sendTokenResponse = (customer, statusCode, res) => {
     token,
   });
 };
-
-// paymentAccount
-//     .save()
-//     .then((account) => {
-//       return bcrypt
-//         .hash(password, 12)
-//         .then((hashedPassword) => {
-//           const customer = new Customer({
-//             name: name,
-//             email: email,
-//             paymentAccountId: account._id,
-//             phoneNumber: phoneNumber,
-//             password: hashedPassword,
-//           });
-//           return customer.save();
-//         })
-//         .catch((err) => res.json({ msg: err.errors.email.message }));
-//     })
-//     .then(() => {
-//       const token = customer.SignJwtToken();
-//       res.json({ success: true, token: this.token });
-//     })
-//     .catch((err) => {
-//       console.log(err);
-//       res.json({ success: false });
-//     });

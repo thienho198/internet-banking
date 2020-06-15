@@ -4,39 +4,9 @@ const PaymentAccount = require('../models/paymentAccount');
 const md5 = require('md5');
 const crypto = require('crypto');
 const openpgp = require('openpgp');
+const { response } = require('express');
 
-exports.protect = (req, res, next) => {
-  protect(req, res, next);
-};
-
-//Verify outter bank
-exports.protectBank = async (req, res, next) => {
-  if (!req.headers.company_id) {
-    protect(req, res, next);
-  } else {
-    protectBank(req, res, next);
-    next();
-  }
-};
-
-exports.protectKey = async (req, res, next) => {
-  if (!req.headers.company_id) {
-    protect(req, res, next);
-  } else {
-    protectBank(req, res, next);
-    let data = JSON.stringify(req.body.data);
-    let signature = req.body.signature;
-    const verify = crypto.createVerify('SHA256');
-    verify.write(data);
-    verify.end();
-    if (verify.verify(publicKey, sig, 'hex')) {
-      next();
-    }
-    res.json('');
-  }
-};
-
-const protect = async (req, res, next) => {
+exports.protect = async (req, res, next) => {
   let token;
   if (req.headers.authorization) {
     token = req.headers.authorization;
@@ -48,6 +18,7 @@ const protect = async (req, res, next) => {
   }
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    console.log(decoded);
     req.customer = await Customer.findById(decoded.id);
     next();
   } catch (err) {
@@ -57,9 +28,32 @@ const protect = async (req, res, next) => {
   }
 };
 
+//Verify outter bank
+exports.protectBank = async (req, res, next) => {
+  if (!req.headers.company_id) {
+    return res.status(401).json({ err: 'You dont allow to access' });
+  } else {
+    protectBank(req, res, next);
+    next();
+  }
+};
+
+exports.protectKey = async (req, res, next) => {
+  let data = JSON.stringify(req.body.data);
+  let signature = req.body.signature;
+  const verify = crypto.createVerify('SHA256');
+  verify.write(data);
+  verify.end();
+  let check = verify.verify(process.env.RGP_PUBLICKEY, sig, 'hex');
+  if (check) {
+    next();
+  }
+  return res
+    .status(401)
+    .json({ err: 'Wrong verify. You dont allow to access' });
+};
+
 const protectBank = async (req, res, next) => {
-  const { stk } = req.body;
-  console.log(req.body);
   const sig = req.headers.sig;
   const ts = req.headers.ts;
   if (req.headers.company_id !== process.env.RGP_ID) {
