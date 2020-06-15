@@ -4,20 +4,22 @@ exports.getRgpBank = async (req, res, next) => {
   try {
     console.log(req.body);
     let timestamp = Date.now();
-    let sig = md5(timestamp + req.body + 'hPZno63KBfZeIcvYLDwx');
-    const response = await axios.get(
+    let sig = md5(timestamp + req.body + 'ThisKeyForHash');
+    const response = await axios.post(
       'https://salty-meadow-17297.herokuapp.com/customer/query_information',
+      req.body,
       {
         headers: {
-          company_id: 'TttwVLKHvXRujyllDq',
+          company_id: 'pawGDX1Ddu',
           timestamp: timestamp,
           'x-signature': sig,
         },
       }
     );
+    res.json({ success: true, data: response.data.data });
     console.log(response);
   } catch (error) {
+    res.json({ success: false });
     console.error(error);
   }
-  res.json({ success: true });
 };
