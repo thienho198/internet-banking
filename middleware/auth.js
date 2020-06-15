@@ -42,10 +42,13 @@ exports.protectKey = async (req, res, next) => {
   try {
     let data = JSON.stringify(req.body.data);
     let signature = req.body.signature;
+    console.log('data: ' + req.body.data);
+    console.log('sig: ' + req.body.signature);
     const verify = crypto.createVerify('SHA256');
     verify.write(data);
     verify.end();
-    let check = verify.verify(process.env.RGP_PUBLICKEY, sig, 'hex');
+    let check = verify.verify(process.env.RGP_PUBLICKEY, signature, 'hex');
+    console.log('check' + check);
     if (check) {
       next();
     }
