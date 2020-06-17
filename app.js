@@ -1,24 +1,21 @@
-const express = require("express");
-const bodyParser = require("body-parser");
-const mongoose = require("mongoose");
+const express = require('express');
+const dotenv = require('dotenv');
+const connectDB = require('./config/db');
 
-const MONGODB_URI =
-  "mongodb+srv://ho:yUaWyeDwbXcIOpNl@cluster0-voj2r.mongodb.net/internet-banking";
+//Load env vars
+dotenv.config({ path: './config/config.env' });
 
 const app = express();
 
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(bodyParser.json());
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
 
-const customerRoutes = require("./routes/customer");
-const deptReminderRoutes = require("./routes/deptReminder");
+const customerRoutes = require('./routes/customer');
+const deptReminderRoutes = require('./routes/deptReminder');
 const paymentRoutes = require('./routes/payment');
+const bankRoutes = require('./routes/bank');
 
-app.use(customerRoutes, deptReminderRoutes, paymentRoutes);
-
-mongoose
-  .connect(MONGODB_URI)
-  .then(() => {
-    app.listen(4000);
-  })
-  .catch((err) => console(err));
+app.use(customerRoutes, deptReminderRoutes, paymentRoutes, bankRoutes);
+connectDB();
+var PORT = process.env.PORT || 3000;
+app.listen(PORT);
