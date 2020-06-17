@@ -128,6 +128,38 @@ exports.addMoneyByEmail = async (req, res, next) => {
   }
 };
 
+exports.transferMoney = async (req, res, next) => {
+  const accessToken = req.headers['x-access-token'];
+  const { stk, amountOfMoney } = req.body;
+  jwt.verify(
+    accessToken,
+    process.env.JWT_SECRET,
+    { ignoreExpiration: true },
+    async function (err, payload) {
+      const { id } = payload;
+      const customer = await Customer.findById(id);
+      if (!customer) {
+        return res.status(400).json({ success: false, err: 'User not exists' });
+      }
+      const userAccount = await PaymentAccount.findById(
+        customer.paymentAccountId
+      );
+      const allFee = amountOfMoney + parseInt(process.env.FEETRANSFER);
+
+      if (userAccount.balance < allFee)
+        return res
+          .status(406)
+          .json({ success: false, err: 'You dont have enough money' });
+      const transferAccount = await PaymentAccount.findOne({ stk: stk });
+      transferAccount.balance = transferAccount.balance + amountOfMoney;
+      userAccount.balance = userAccount.balance - allFee;
+      await userAccount.save();
+      await transferAccount.save();
+      return res.json({ userAccount, transferAccount });
+    }
+  );
+};
+
 exports.refresh = async (req, res, next) => {
   const { refreshToken, accessToken } = req.body;
   jwt.verify(
@@ -144,10 +176,6 @@ exports.refresh = async (req, res, next) => {
         const newAccessToken = customer.SignJwtToken();
         res.status(202).json({ accessToken: newAccessToken, refreshToken });
       }
-      // if (ret === false) {
-      //   throw createError(400, 'Invalid refresh token.');
-      // }
-      // const accessToken = generateAccessToken(userId);
       res.status(402).json({ success: false, err: 'Invalid refresh token' });
     }
   );
