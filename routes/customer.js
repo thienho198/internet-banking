@@ -10,5 +10,6 @@ router.post('/customer/login', customerController.login);
 router.get('/customer/getListDeptReminderWasRemined', protect, customerController.getListDeptReminderWasRemined);
 router.get('/customer/getListDeptReminderRemind', protect, customerController.getListDeptReminderRemind);
 router.post('/customer/addMoneyByEmail', customerController.addMoneyByEmail);
+router.post('/customer/refresh', customerController.refresh);
 
 module.exports = router;

@@ -32,6 +32,7 @@ const customerSchema = new Schema({
     ref: 'PaymentAccount',
     require: true,
   },
+  refreshToken: String,
   listDeptReminders: [
     {
       deptReminderId: {
@@ -48,6 +49,9 @@ customerSchema.plugin(uniqueValidator, { message: 'is already taken.' });
 
 //Encrypt password before create model
 customerSchema.pre('save', async function (next) {
+  if (!this.isModified('password')) {
+    next();
+  }
   this.password = await bcrypt.hash(this.password, 12);
 });
 
