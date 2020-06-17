@@ -2,6 +2,8 @@ const generator = require('creditcard-generator');
 const PaymentAccount = require('../models/paymentAccount');
 const Customer = require('../models/customer');
 const paymentController = require('../controllers/paymentController');
+const randToken = require('rand-token');
+const jwt = require('jsonwebtoken');
 
 exports.getListDeptReminderWasRemined = (req, res, next) => {
   const customerId = req.query.id;
@@ -63,8 +65,6 @@ exports.postCreateCustomer = async (req, res, next) => {
     stk: stk,
     balance: balance,
   });
-  console.log(account);
-
   try {
     const customer = await Customer.create({
       name: name,
@@ -73,7 +73,6 @@ exports.postCreateCustomer = async (req, res, next) => {
       phoneNumber: phoneNumber,
       password: password,
     });
-    sendTokenResponse(customer, 200, res);
   } catch (err) {
     if (err.errors.email) {
       res
@@ -87,7 +86,6 @@ exports.postCreateCustomer = async (req, res, next) => {
 
 exports.login = async (req, res, next) => {
   const { email, password } = req.body;
-  req.header;
   const customer = await Customer.findOne({ email }).select('+password');
   if (!customer) {
     return res
@@ -101,7 +99,15 @@ exports.login = async (req, res, next) => {
       .status(401)
       .json({ error: 'Authentication invalid, please try again' });
   }
-  sendTokenResponse(customer, 200, res);
+  const accesstoken = customer.SignJwtToken();
+  const refreshToken = randToken.generate(process.env.REFRESH_TOKEN);
+  customer.refreshToken = refreshToken;
+  await customer.save({ validateBeforeSave: false });
+  res.status(200).json({
+    success: true,
+    accesstoken,
+    refreshToken,
+  });
 };
 
 exports.addMoneyByEmail = async (req, res, next) => {
@@ -122,16 +128,27 @@ exports.addMoneyByEmail = async (req, res, next) => {
   }
 };
 
-const sendTokenResponse = (customer, statusCode, res) => {
-  const token = customer.SignJwtToken();
-  const options = {
-    expires: new Date(
-      Date.now() + process.env.JWT_COOKIE_EXPIRE * 24 * 60 * 60 * 1000
-    ),
-    httpOnly: true,
-  };
-  res.status(statusCode).cookie('token', token, options).json({
-    success: true,
-    token,
-  });
+exports.refresh = async (req, res, next) => {
+  const { refreshToken, accessToken } = req.body;
+  jwt.verify(
+    accessToken,
+    process.env.JWT_SECRET,
+    { ignoreExpiration: true },
+    async function (err, payload) {
+      const { id } = payload;
+      const customer = await Customer.findById(id);
+      if (!customer) {
+        res.status(400).json({ success: false, err: 'User not exists' });
+      }
+      if (customer.refreshToken === refreshToken) {
+        const newAccessToken = customer.SignJwtToken();
+        res.status(202).json({ accessToken: newAccessToken, refreshToken });
+      }
+      // if (ret === false) {
+      //   throw createError(400, 'Invalid refresh token.');
+      // }
+      // const accessToken = generateAccessToken(userId);
+      res.status(402).json({ success: false, err: 'Invalid refresh token' });
+    }
+  );
 };

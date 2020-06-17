@@ -3,6 +3,7 @@ const md5 = require('md5');
 const PaymentAccount = require('../models/paymentAccount');
 const openpgp = require('openpgp');
 const constant = require('../config/env');
+
 exports.getRgpBank = async (req, res, next) => {
   try {
     console.log(req.body);

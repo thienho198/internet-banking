@@ -9,9 +9,8 @@ const constant = require('../config/env');
 
 exports.protect = async (req, res, next) => {
   let token;
-  console.log(constant.RGP_PUBLICKEY);
-  if (req.headers.authorization) {
-    token = req.headers.authorization;
+  if (req.headers['x-access-token']) {
+    token = req.headers['x-access-token'];
   }
   if (!token) {
     return res
@@ -22,6 +21,7 @@ exports.protect = async (req, res, next) => {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     console.log(decoded);
     req.customer = await Customer.findById(decoded.id);
+    console.log(decoded);
     next();
   } catch (err) {
     return res

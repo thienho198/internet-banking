@@ -18,5 +18,6 @@ router.get(
   customerController.getListDeptReminderRemind
 );
 router.post('/customer/addMoneyByEmail', customerController.addMoneyByEmail);
+router.post('/customer/refresh', customerController.refresh);
 
 module.exports = router;

@@ -23,6 +23,7 @@
     "mongodb": "^3.5.7",
     "mongoose": "^5.9.13",
     "mongoose-unique-validator": "^2.0.3",
-    "openpgp": "^4.10.4"
+    "openpgp": "^4.10.4",
+    "rand-token": "^1.0.1"
   }
 }
