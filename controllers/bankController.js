@@ -57,6 +57,18 @@ const responsePgp = async (res, obj, status) => {
     message: openpgp.cleartext.fromText(object), // CleartextMessage or Message object
     privateKeys: [privateKey], // for signing
   });
+  const verified = await openpgp.verify({
+    message: await openpgp.cleartext.readArmored(cleartext), // parse armored message
+    publicKeys: (await openpgp.key.readArmored(constant.BANK_PUBLIC_KEY)).keys, // for verification
+  });
+
+  const { valid } = verified.signatures[0];
+  console.log(valid);
+  if (valid) {
+    console.log('signed by key id ' + verified.signatures[0].keyid.toHex());
+  } else {
+    throw new Error('signature could not be verified');
+  }
   const response = {
     cleartext: cleartext,
   };
