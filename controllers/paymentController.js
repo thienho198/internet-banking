@@ -19,7 +19,7 @@ exports.getCustomerByPaymentAccount = async (req, res, next) => {
   }
   res
     .status(200)
-    .json({ success: true, username: customer.name, msg: 'found' });
+    .json({ success: true, data: { username: customer.name }, msg: 'found' });
 };
 
 exports.getAll = async (req, res, next) => {
