@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
 
 const Schema = mongoose.Schema;
 
@@ -6,7 +6,7 @@ const paymentAccountSchema = new Schema({
   stk: {
     type: Schema.Types.String,
     require: true,
-    unique: true
+    unique: true,
   },
   balance: {
     type: Schema.Types.Number,
@@ -14,4 +14,4 @@ const paymentAccountSchema = new Schema({
   },
 });
 
-module.exports = mongoose.model("PaymentAccount", paymentAccountSchema);
+module.exports = mongoose.model('PaymentAccount', paymentAccountSchema);

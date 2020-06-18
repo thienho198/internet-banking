@@ -2,7 +2,6 @@ const generator = require('creditcard-generator');
 const PaymentAccount = require('../models/paymentAccount');
 const Customer = require('../models/customer');
 const paymentController = require('../controllers/paymentController');
-const randToken = require('rand-token');
 const jwt = require('jsonwebtoken');
 
 exports.getListDeptReminderWasRemined = (req, res, next) => {
@@ -73,6 +72,7 @@ exports.postCreateCustomer = async (req, res, next) => {
       phoneNumber: phoneNumber,
       password: password,
     });
+    res.json({ success: true });
   } catch (err) {
     if (err.errors.email) {
       res
@@ -82,32 +82,6 @@ exports.postCreateCustomer = async (req, res, next) => {
       res.json({ success: false });
     }
   }
-};
-
-exports.login = async (req, res, next) => {
-  const { email, password } = req.body;
-  const customer = await Customer.findOne({ email }).select('+password');
-  if (!customer) {
-    return res
-      .status(401)
-      .json({ error: 'Authentication invalid, please try again' });
-  }
-
-  const isMatch = await customer.mathPassword(password);
-  if (!isMatch) {
-    return res
-      .status(401)
-      .json({ error: 'Authentication invalid, please try again' });
-  }
-  const accesstoken = customer.SignJwtToken();
-  const refreshToken = randToken.generate(process.env.REFRESH_TOKEN);
-  customer.refreshToken = refreshToken;
-  await customer.save({ validateBeforeSave: false });
-  res.status(200).json({
-    success: true,
-    accesstoken,
-    refreshToken,
-  });
 };
 
 exports.addMoneyByEmail = async (req, res, next) => {
