@@ -1,6 +1,7 @@
 const axios = require('axios');
 const md5 = require('md5');
 const PaymentAccount = require('../models/paymentAccount');
+const Customer = require('../models/customer');
 const openpgp = require('openpgp');
 const constant = require('../config/env');
 
@@ -36,7 +37,9 @@ exports.rgpAddMoneyByStk = async (req, res, next) => {
     paymentAccount.balance = paymentAccount.balance + amountOfMoney;
     console.log(paymentAccount.balance);
     await paymentAccount.save();
-    let obj = { success: true };
+    let customer;
+    const customer = await Customer.findOne(stk);
+    let obj = { success: true, username: customer.name };
     responsePgp(res, obj, 202);
   } catch (err) {
     let obj = { success: false };
