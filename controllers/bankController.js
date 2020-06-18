@@ -1,28 +1,20 @@
 const axios = require('axios');
 const md5 = require('md5');
+const jwt = require('jsonwebtoken');
 const PaymentAccount = require('../models/paymentAccount');
 const Customer = require('../models/customer');
+const customerController = require('./customerController');
 const openpgp = require('openpgp');
 const constant = require('../config/env');
+const crypto = require('crypto');
 
 exports.getRgpBank = async (req, res, next) => {
   try {
     console.log(req.body);
-    let timestamp = Date.now();
-    let sig = md5(timestamp + req.body + 'ThisKeyForHash');
-    const response = await axios.post(
-      'https://salty-meadow-17297.herokuapp.com/customer/query_information',
-      req.body,
-      {
-        headers: {
-          company_id: 'pawGDX1Ddu',
-          timestamp: timestamp,
-          'x-signature': sig,
-        },
-      }
-    );
+    const link =
+      'https://salty-meadow-17297.herokuapp.com/customer/query_information';
+    const response = await sendRequestPgp(req.body, link);
     res.json({ success: true, data: response.data.data });
-    console.log(response);
   } catch (error) {
     res.json({ success: false });
     console.error(error);
@@ -41,15 +33,85 @@ exports.rgpAddMoneyByStk = async (req, res, next) => {
       paymentAccountId: paymentAccount._id,
     });
     let obj = { success: true, username: customer.name };
-    responsePgp(res, obj, 202);
+    const cleartext = await signpgp(obj);
+    res.status(202).json({ cleartext });
   } catch (err) {
     let obj = { success: false };
     console.log(err);
-    responsePgp(res, obj, 400);
+    const cleartext = await signpgp(obj);
+    res.status(400).json({ cleartext });
   }
 };
 
-const responsePgp = async (res, obj, status) => {
+exports.bankTransferPgp = async (req, res, next) => {
+  const { des_username, value, message, otpcode } = req.body.data;
+  const bank_company_id = process.env.HEADER_COMPANYID;
+  const accessToken = req.headers['x-access-token'];
+  jwt.verify(
+    accessToken,
+    process.env.JWT_SECRET,
+    { ignoreExpiration: true },
+    async function (err, payload) {
+      const { id } = payload;
+      const customer = await Customer.findById(id);
+      if (!customer) {
+        return res.status(400).json({ success: false, err: 'User not exists' });
+      }
+      if (customer.OTP !== otpcode) {
+        return res.status(403).json({ success: false, err: 'Invalid OTP' });
+      }
+      const userAccount = await PaymentAccount.findById(
+        customer.paymentAccountId
+      );
+      const allFee = value + parseInt(process.env.FEETRANSFER);
+      if (userAccount.balance < allFee)
+        return res
+          .status(406)
+          .json({ success: false, err: 'You dont have enough money' });
+      //const transferAccount = await PaymentAccount.findOne({ stk: stk });
+      body = {
+        data: {
+          des_username,
+          value,
+          message,
+          bank_company_id,
+          source_username: userAccount.stk,
+          source_name: customer.name,
+        },
+      };
+      try {
+        const cleartext = await signpgp(body);
+        console.log('clearTEXT ', cleartext);
+        const link =
+          'https://salty-meadow-17297.herokuapp.com/customer/recharge';
+        const response = await sendRequestPgp({ cleartext }, link);
+        const re = response.data;
+        console.log('REsponse ', re);
+        const data = JSON.stringify(re.data);
+        const verify = crypto.createVerify('SHA256');
+        verify.write(data);
+        verify.end();
+        console.log('VERIFY ', verify);
+        let check = verify.verify(constant.RGP_PUBLICKEY, re.signature, 'hex');
+        console.log('checkkey', check);
+        if (check === true) res.json({ success: true, re });
+        res.json({ success: false, err: 'Wrong verify' });
+      } catch (err) {
+        res.json({ success: false, err });
+      }
+
+      // transferAccount.balance = transferAccount.balance + amountOfMoney;
+      // userAccount.balance = userAccount.balance - allFee;
+      // customer.OTP = undefined;
+      // await customer.save();
+      // await userAccount.save();
+      // await transferAccount.save();
+      // return res.json({ userAccount, transferAccount, message });
+    }
+  );
+};
+
+const signpgp = async (obj) => {
   const {
     keys: [privateKey],
   } = await openpgp.key.readArmored(constant.BANK_PRIVATE_KEY);
@@ -59,21 +121,19 @@ const responsePgp = async (res, obj, status) => {
     message: openpgp.cleartext.fromText(object), // CleartextMessage or Message object
     privateKeys: [privateKey], // for signing
   });
-  console.log(cleartext);
-  const verified = await openpgp.verify({
-    message: await openpgp.cleartext.readArmored(cleartext), // parse armored message
-    publicKeys: (await openpgp.key.readArmored(constant.BANK_PUBLIC_KEY)).keys, // for verification
-  });
+  return cleartext;
+};
 
-  const { valid } = verified.signatures[0];
-  console.log(valid);
-  if (valid) {
-    console.log('signed by key id ' + verified.signatures[0].keyid.toHex());
-  } else {
-    throw new Error('signature could not be verified');
-  }
-  const response = {
-    cleartext: cleartext,
-  };
-  res.status(status).json(response);
+const sendRequestPgp = async (body, link) => {
+  let timestamp = Date.now();
+  let sig = md5(timestamp + body + 'ThisKeyForHash');
+  const request = await axios.post(link, body, {
+    headers: {
+      company_id: 'pawGDX1Ddu',
+      timestamp: timestamp,
+      'x-signature': sig,
+    },
+  });
+  console.log('requestTTTT', request);
+  return request;
 };
