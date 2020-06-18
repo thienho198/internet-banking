@@ -16,6 +16,7 @@ router.get(
   protect,
   customerController.getListDeptReminderRemind
 );
+router.post('/customer/sendOTP', protect, customerController.sendOTP);
 router.post('/customer/transfer', protect, customerController.transferMoney);
 router.post('/customer/addMoneyByEmail', customerController.addMoneyByEmail);
 router.post('/customer/refresh', customerController.refresh);

@@ -28,6 +28,7 @@
 		"nodemailer": "^6.4.10",
 		"nodemailer-smtp-transport": "^2.7.4",
 		"openpgp": "^4.10.4",
-		"rand-token": "^1.0.1"
+		"rand-token": "^1.0.1",
+		"random-number": "0.0.9"
 	}
 }

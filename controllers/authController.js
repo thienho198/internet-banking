@@ -2,7 +2,6 @@ const Customer = require('../models/customer');
 const randToken = require('rand-token');
 const jwt = require('jsonwebtoken');
 const sendEmail = require('../utils/sendEmail');
-const { User } = require('openpgp');
 exports.login = async (req, res, next) => {
   const { email, password } = req.body;
   const customer = await Customer.findOne({ email }).select('+password');
@@ -51,7 +50,6 @@ exports.forgotPassword = async (req, res, next) => {
     });
     res.status(200).json({ success: true, data: 'Email sent' });
   } catch (err) {
-    console.log(err);
     customer.resetPasswordToken = undefined;
     await customer.save({ validateBeforeSave: false });
     res.status(500).json({ err: 'Email could not be sent' });
