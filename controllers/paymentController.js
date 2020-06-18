@@ -17,7 +17,9 @@ exports.getCustomerByPaymentAccount = async (req, res, next) => {
   if (!customer) {
     res.status(404).json({ success: false, mes: 'customer not found' });
   }
-  res.status(200).json({ success: true, data: customer, msg: 'found' });
+  res
+    .status(200)
+    .json({ success: true, username: customer.name, msg: 'found' });
 };
 
 exports.getAll = async (req, res, next) => {
