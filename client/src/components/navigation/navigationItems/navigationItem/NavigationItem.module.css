@@ -1,0 +1,24 @@
+.navigationItem {
+	margin: 10px 0;
+	box-sizing: border-box;
+	display: block;
+	width: 100%;
+	margin: 0px;
+}
+
+.navigationItem a {
+	color: rgba(0, 0, 0, .85);
+	text-decoration: none;
+	width: 100%;
+	box-sizing: border-box;
+	display: block;
+	padding: 0px 15px;
+	line-height: 56px;
+}
+
+.navigationItem a:hover,
+.navigationItem a:active,
+.navigationItem a.active {
+	color: #40a4c8;
+	border-bottom: 2px solid #40a4c8;
+}
