@@ -25,11 +25,10 @@
 		"mongodb": "^3.5.7",
 		"mongoose": "^5.9.13",
 		"mongoose-unique-validator": "^2.0.3",
+		"nodemailer": "^6.4.10",
+		"nodemailer-smtp-transport": "^2.7.4",
 		"openpgp": "^4.10.4",
 		"rand-token": "^1.0.1",
-		"react-redux": "^7.2.0",
-		"react-router-dom": "^5.2.0",
-		"redux": "^4.0.5",
-		"redux-thunk": "^2.3.0"
+		"random-number": "0.0.9"
 	}
 }

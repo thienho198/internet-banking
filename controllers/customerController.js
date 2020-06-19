@@ -2,7 +2,8 @@ const generator = require('creditcard-generator');
 const PaymentAccount = require('../models/paymentAccount');
 const Customer = require('../models/customer');
 const paymentController = require('../controllers/paymentController');
-const randToken = require('rand-token');
+const sendEmail = require('../utils/sendEmail');
+const rn = require('random-number');
 const jwt = require('jsonwebtoken');
 
 exports.getListDeptReminderWasRemined = (req, res, next) => {
@@ -73,6 +74,7 @@ exports.postCreateCustomer = async (req, res, next) => {
       phoneNumber: phoneNumber,
       password: password,
     });
+    res.json({ success: true });
   } catch (err) {
     if (err.errors.email) {
       res
@@ -82,32 +84,6 @@ exports.postCreateCustomer = async (req, res, next) => {
       res.json({ success: false });
     }
   }
-};
-
-exports.login = async (req, res, next) => {
-  const { email, password } = req.body;
-  const customer = await Customer.findOne({ email }).select('+password');
-  if (!customer) {
-    return res
-      .status(401)
-      .json({ error: 'Authentication invalid, please try again' });
-  }
-
-  const isMatch = await customer.mathPassword(password);
-  if (!isMatch) {
-    return res
-      .status(401)
-      .json({ error: 'Authentication invalid, please try again' });
-  }
-  const accesstoken = customer.SignJwtToken();
-  const refreshToken = randToken.generate(process.env.REFRESH_TOKEN);
-  customer.refreshToken = refreshToken;
-  await customer.save({ validateBeforeSave: false });
-  res.status(200).json({
-    success: true,
-    accesstoken,
-    refreshToken,
-  });
 };
 
 exports.addMoneyByEmail = async (req, res, next) => {
@@ -128,6 +104,66 @@ exports.addMoneyByEmail = async (req, res, next) => {
   }
 };
 
+exports.sendOTP = async (req, res, next) => {
+  const customer = await Customer.findOne({ email: req.body.email });
+  if (!customer) {
+    return res.status(401).json({ success: false, err: 'Invalid email!' });
+  }
+  let number = generateOTP();
+  customer.OTP = number;
+  const message = `Your OTP is: ${number}`;
+  try {
+    await sendEmail({
+      email: customer.email,
+      subject: 'OTP for transfer',
+      message,
+    });
+    await customer.save({ validateBeforeSave: false });
+    res.status(200).json({ success: true, data: 'Email sent' });
+  } catch (err) {
+    customer.OTP = undefined;
+    await customer.save({ validateBeforeSave: false });
+    res.status(500).json({ err: 'Email could not be sent' });
+  }
+};
+
+exports.transferMoney = async (req, res, next) => {
+  const accessToken = req.headers['x-access-token'];
+  const { stk, amountOfMoney, message, otpcode } = req.body;
+  jwt.verify(
+    accessToken,
+    process.env.JWT_SECRET,
+    { ignoreExpiration: true },
+    async function (err, payload) {
+      const { id } = payload;
+      const customer = await Customer.findById(id);
+      if (!customer) {
+        return res.status(400).json({ success: false, err: 'User not exists' });
+      }
+      if (customer.OTP !== otpcode) {
+        return res.status(403).json({ success: false, err: 'Invalid OTP' });
+      }
+      const userAccount = await PaymentAccount.findById(
+        customer.paymentAccountId
+      );
+      const allFee = amountOfMoney + parseInt(process.env.FEETRANSFER);
+      if (userAccount.balance < allFee)
+        return res
+          .status(406)
+          .json({ success: false, err: 'You dont have enough money' });
+
+      const transferAccount = await PaymentAccount.findOne({ stk: stk });
+      transferAccount.balance = transferAccount.balance + amountOfMoney;
+      userAccount.balance = userAccount.balance - allFee;
+      customer.OTP = undefined;
+      await customer.save();
+      await userAccount.save();
+      await transferAccount.save();
+      return res.json({ userAccount, transferAccount, message });
+    }
+  );
+};
+
 exports.refresh = async (req, res, next) => {
   const { refreshToken, accessToken } = req.body;
   jwt.verify(
@@ -144,11 +180,13 @@ exports.refresh = async (req, res, next) => {
         const newAccessToken = customer.SignJwtToken();
         res.status(202).json({ accessToken: newAccessToken, refreshToken });
       }
-      // if (ret === false) {
-      //   throw createError(400, 'Invalid refresh token.');
-      // }
-      // const accessToken = generateAccessToken(userId);
       res.status(402).json({ success: false, err: 'Invalid refresh token' });
     }
   );
 };
+
+var generateOTP = rn.generator({
+  min: 10000,
+  max: 99999,
+  integer: true,
+});

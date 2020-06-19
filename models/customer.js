@@ -33,6 +33,8 @@ const customerSchema = new Schema({
     require: true,
   },
   refreshToken: String,
+  resetPasswordToken: String,
+  OTP: Number,
   listDeptReminders: [
     {
       deptReminderId: {
