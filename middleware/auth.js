@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken');
 const Customer = require('../models/customer');
+const Banker = require('../models/customer');
 const PaymentAccount = require('../models/paymentAccount');
 const md5 = require('md5');
 const crypto = require('crypto');
@@ -8,10 +9,7 @@ const { response } = require('express');
 const constant = require('../config/env');
 
 exports.protect = async (req, res, next) => {
-  let token;
-  if (req.headers['x-access-token']) {
-    token = req.headers['x-access-token'];
-  }
+  let token = req.headers['x-access-token'];
   if (!token) {
     return res
       .status(401)
@@ -25,6 +23,20 @@ exports.protect = async (req, res, next) => {
     return res
       .status(401)
       .json({ err: 'You need to login before access this route' });
+  }
+};
+
+exports.verifyBanker = async (req, res, next) => {
+  let token = req.headers['x-access-token'];
+  if (!token) {
+    return res.status(401).json({ err: 'You have no right to access' });
+  }
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    req.banker = await Banker.findById(decoded.id);
+    next();
+  } catch (err) {
+    return res.status(401).json({ err: 'You have no right to access' });
   }
 };
 

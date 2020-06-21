@@ -39,18 +39,3 @@ exports.getAccount = async (req, res, next) => {
   }
   return res.status(200).json({ success: true, yourAccount: { account } });
 };
-
-exports.addMoneyByStk = async (req, res, next) => {
-  const { stk, amountOfMoney } = req.body;
-  try {
-    const paymentAccount = await PaymentAccount.findOne({ stk: stk });
-    paymentAccount.balance = paymentAccount.balance + amountOfMoney;
-    await paymentAccount.save();
-    return res
-      .status(200)
-      .json({ success: true, currentBalance: paymentAccount.balance });
-  } catch (err) {
-    console.log(err);
-    return res.status(400).json({ success: false, message: 'server error' });
-  }
-};

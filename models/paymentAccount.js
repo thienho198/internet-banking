@@ -12,6 +12,10 @@ const paymentAccountSchema = new Schema({
     type: Schema.Types.Number,
     require: true,
   },
+  name: {
+    type: Schema.Types.String,
+    require: true,
+  },
 });
 
 module.exports = mongoose.model('PaymentAccount', paymentAccountSchema);

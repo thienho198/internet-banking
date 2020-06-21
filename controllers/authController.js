@@ -1,31 +1,61 @@
 const Customer = require('../models/customer');
+const Banker = require('../models/banker');
 const randToken = require('rand-token');
 const jwt = require('jsonwebtoken');
 const sendEmail = require('../utils/sendEmail');
+const e = require('express');
 exports.login = async (req, res, next) => {
   const { email, password } = req.body;
-  const customer = await Customer.findOne({ email }).select('+password');
-  if (!customer) {
-    return res
-      .status(401)
-      .json({ error: 'Authentication invalid, please try again' });
+  let user = await Customer.findOne({ email }).select('+password');
+  let userAccess = 'customer';
+  if (!user) {
+    user = await Banker.findOne({ email }).select('+password');
+    if (!user) {
+      return res
+        .status(401)
+        .json({ error: 'Authentication invalid, please try again' });
+    }
+    if (user.role === 'employee') userAccess = 'employee';
+    else userAccess = 'admin';
   }
-
-  const isMatch = await customer.mathPassword(password);
+  const isMatch = await user.mathPassword(password);
   if (!isMatch) {
     return res
       .status(401)
       .json({ error: 'Authentication invalid, please try again' });
   }
-  const accesstoken = customer.SignJwtToken();
+  const accesstoken = user.SignJwtToken();
   const refreshToken = randToken.generate(process.env.REFRESH_TOKEN);
-  customer.refreshToken = refreshToken;
-  await customer.save({ validateBeforeSave: false });
+  user.refreshToken = refreshToken;
+  await user.save({ validateBeforeSave: false });
   res.status(200).json({
     success: true,
+    userAccess,
     accesstoken,
     refreshToken,
   });
+};
+
+exports.refresh = async (req, res, next) => {
+  const { refreshToken, accessToken } = req.body;
+  jwt.verify(
+    accessToken,
+    process.env.JWT_SECRET,
+    { ignoreExpiration: true },
+    async function (err, payload) {
+      const { id } = payload;
+      let user = await Customer.findById(id);
+      if (!user) {
+        user = await Banker.findById(id);
+        if (!user)
+          res.status(400).json({ success: false, err: 'User not exists' });
+      }
+      if (user.refreshToken === refreshToken) {
+        const newAccessToken = user.SignJwtToken();
+        res.status(202).json({ accessToken: newAccessToken, refreshToken });
+      }
+    }
+  );
 };
 
 exports.forgotPassword = async (req, res, next) => {

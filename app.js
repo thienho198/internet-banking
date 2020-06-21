@@ -15,13 +15,15 @@ const deptReminderRoutes = require('./routes/deptReminder');
 const paymentRoutes = require('./routes/payment');
 const bankRoutes = require('./routes/bank');
 const authRoutes = require('./routes/auth');
+const bankerRoutes = require('./routes/banker');
 
 app.use(
   customerRoutes,
   deptReminderRoutes,
   paymentRoutes,
   bankRoutes,
-  authRoutes
+  authRoutes,
+  bankerRoutes
 );
 connectDB();
 app.use((req, res, next) => {

@@ -18,7 +18,5 @@ router.get(
 );
 router.post('/customer/sendOTP', protect, customerController.sendOTP);
 router.post('/customer/transfer', protect, customerController.transferMoney);
-router.post('/customer/addMoneyByEmail', customerController.addMoneyByEmail);
-router.post('/customer/refresh', customerController.refresh);
 
 module.exports = router;

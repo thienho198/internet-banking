@@ -60,9 +60,15 @@ exports.getListDeptReminderRemind = (req, res, next) => {
 
 exports.postCreateCustomer = async (req, res, next) => {
   const { name, email, phoneNumber, password } = req.body;
+  if (!name || !email || !password) {
+    return res
+      .status(400)
+      .json({ success: false, msg: 'Please add name, email and password' });
+  }
   const stk = generator.GenCC('VISA', 1).toString();
   const balance = 0;
   const account = await PaymentAccount.create({
+    name: name,
     stk: stk,
     balance: balance,
   });
@@ -164,26 +170,26 @@ exports.transferMoney = async (req, res, next) => {
   );
 };
 
-exports.refresh = async (req, res, next) => {
-  const { refreshToken, accessToken } = req.body;
-  jwt.verify(
-    accessToken,
-    process.env.JWT_SECRET,
-    { ignoreExpiration: true },
-    async function (err, payload) {
-      const { id } = payload;
-      const customer = await Customer.findById(id);
-      if (!customer) {
-        res.status(400).json({ success: false, err: 'User not exists' });
-      }
-      if (customer.refreshToken === refreshToken) {
-        const newAccessToken = customer.SignJwtToken();
-        res.status(202).json({ accessToken: newAccessToken, refreshToken });
-      }
-      res.status(402).json({ success: false, err: 'Invalid refresh token' });
-    }
-  );
-};
+// exports.refresh = async (req, res, next) => {
+//   const { refreshToken, accessToken } = req.body;
+//   jwt.verify(
+//     accessToken,
+//     process.env.JWT_SECRET,
+//     { ignoreExpiration: true },
+//     async function (err, payload) {
+//       const { id } = payload;
+//       const customer = await Customer.findById(id);
+//       if (!customer) {
+//         res.status(400).json({ success: false, err: 'User not exists' });
+//       }
+//       if (customer.refreshToken === refreshToken) {
+//         const newAccessToken = customer.SignJwtToken();
+//         res.status(202).json({ accessToken: newAccessToken, refreshToken });
+//       }
+//       res.status(402).json({ success: false, err: 'Invalid refresh token' });
+//     }
+//   );
+// };
 
 var generateOTP = rn.generator({
   min: 10000,
