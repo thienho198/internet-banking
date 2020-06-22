@@ -1,4 +1,5 @@
 import React from 'react';
+import { connect } from 'react-redux';
 
 import NavigationItem from './navigationItem/NavigationItem';
 import classes from './NavigationItems.module.css';
@@ -20,4 +21,10 @@ const NavigationItems = (props) => {
 	);
 };
 
-export default NavigationItems;
+const mapStateToProps = (state) => {
+	return {
+		isAuthenticated: state.auth.token !== null
+	};
+};
+
+export default connect(mapStateToProps)(NavigationItems);

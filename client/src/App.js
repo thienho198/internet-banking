@@ -1,10 +1,24 @@
 import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import { Route, Switch, withRouter, Redirect } from 'react-router-dom';
+
 import Layout from './layout/Layout';
+import Login from './modules/login/Login';
 
-function App() {
-	return <Layout>This is content</Layout>;
+export default class App extends React.Component {
+	constructor(props) {
+		super(props);
+	}
+	//#region render
+	render() {
+		const routes = (
+			<Switch>
+				<Route path="/" exact>
+					This is Home
+				</Route>
+				<Route path="/login" exact component={Login} />
+				<Redirect path="/" />
+			</Switch>
+		);
+		return <Layout>{routes}</Layout>;
+	}
 }
-
-export default App;

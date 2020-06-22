@@ -1,0 +1,30 @@
+.loginArea {
+	height: calc(100vh - 56px);
+	width: 100%;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+.loginForm {
+	border: 1px solid #ddd;
+	padding: 20px;
+	padding-bottom: 5px;
+	width: 400px;
+	margin-bottom: 200px;
+}
+.btnLogin {
+	width: 60px;
+	margin: 0 auto;
+}
+.loginImage {
+	width: 120px;
+	height: 120px;
+	border-radius: 60px;
+	overflow: hidden;
+	margin: 0 auto;
+	margin-bottom: 24px;
+}
+
+.loginImage img {
+	height: 100%;
+}

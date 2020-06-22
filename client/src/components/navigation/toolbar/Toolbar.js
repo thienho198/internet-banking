@@ -10,7 +10,7 @@ export default function Toolbar(props) {
 			<div className={classes.logo}>
 				<img src={logo} alt="logo" />
 			</div>
-			<NavigationItems />
+			<NavigationItems isAuthenticated={isAuthenticated} />
 		</header>
 	);
 }

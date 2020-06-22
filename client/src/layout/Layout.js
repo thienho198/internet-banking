@@ -1,5 +1,4 @@
 import React from 'react';
-import { connect } from 'react-redux';
 
 import classes from './Layout.module.css';
 import Toolbar from '../components/navigation/toolbar/Toolbar';
@@ -20,10 +19,4 @@ class Layout extends React.Component {
 	}
 }
 
-const mapStateToProps = (state) => {
-	return {
-		isAuthenticated: state.auth.token !== null
-	};
-};
-
-export default connect(mapStateToProps)(Layout);
+export default Layout;
