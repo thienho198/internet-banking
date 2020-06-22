@@ -26,24 +26,6 @@ const tailLayout = {
 const Login = (props) => {
 	const onFinish = (values) => {
 		props.authLogin(values);
-		// props.authStart();
-		// axios
-		// 	.post('/auth/login', values)
-		// 	.then((results) => {
-		// 		console.log('hhh', results.config.data.email);
-		// 		notification.success({
-		// 			message: 'Đăng nhập thành công',
-		// 			placement: 'bottom'
-		// 		});
-		// 	})
-		// 	.catch((err) => {
-		// 		props.authFaild();
-		// 		notification.error({
-		// 			message: 'Đăng nhập không thành công',
-		// 			description: 'Email hoặc mật khẩu không chính xác',
-		// 			placement: 'bottom'
-		// 		});
-		// 	});
 	};
 
 	return (
@@ -91,17 +73,13 @@ const Login = (props) => {
 							<Input.Password placeholder="Password" />
 						</Form.Item>
 
-						{/* <Form.Item {...tailLayout} name="remember" valuePropName="checked">
-							<Checkbox>Remember me</Checkbox>
-						</Form.Item> */}
-
 						<Form.Item {...tailLayout}>
 							<Button type="primary" htmlType="submit">
 								Login
 							</Button>
 						</Form.Item>
 					</Form>
-					<Button
+					{/* <Button
 						type="primary"
 						onClick={() => {
 							axios
@@ -113,7 +91,7 @@ const Login = (props) => {
 						}}
 					>
 						Test Add Money
-					</Button>
+					</Button> */}
 				</div>
 			</Spin>
 		</div>
