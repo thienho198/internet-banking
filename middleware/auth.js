@@ -20,6 +20,7 @@ exports.protect = async (req, res, next) => {
     req.customer = await Customer.findById(decoded.id);
     next();
   } catch (err) {
+    console.log(err);
     return res
       .status(401)
       .json({ err: 'You need to login before access this route' });

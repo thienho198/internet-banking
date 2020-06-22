@@ -1,5 +1,6 @@
 const generator = require('creditcard-generator');
 const PaymentAccount = require('../models/paymentAccount');
+const History = require('../models/history');
 const Customer = require('../models/customer');
 const paymentController = require('../controllers/paymentController');
 const sendEmail = require('../utils/sendEmail');
@@ -92,24 +93,6 @@ exports.postCreateCustomer = async (req, res, next) => {
   }
 };
 
-exports.addMoneyByEmail = async (req, res, next) => {
-  const { email, amountOfMoney } = req.body;
-  try {
-    const customer = await Customer.findOne({ email: email });
-    const customerPopulateAccountPM = await customer
-      .populate('paymentAccountId')
-      .execPopulate();
-    console.log(customerPopulateAccountPM);
-    const stk = customerPopulateAccountPM.paymentAccountId.stk;
-    paymentController.addMoneyByStk(
-      { body: { stk: stk, amountOfMoney: amountOfMoney } },
-      res
-    );
-  } catch (err) {
-    res.status(400).json({ success: true, message: 'server error' });
-  }
-};
-
 exports.sendOTP = async (req, res, next) => {
   const customer = await Customer.findOne({ email: req.body.email });
   if (!customer) {
@@ -165,32 +148,19 @@ exports.transferMoney = async (req, res, next) => {
       await customer.save();
       await userAccount.save();
       await transferAccount.save();
-      return res.json({ userAccount, transferAccount, message });
+      await History.create({
+        operator: 'Customer',
+        accountSender: userAccount.stk,
+        sender: userAccount.name,
+        accountReceive: stk,
+        receiver: transferAccount.name,
+        message,
+        amountOfMoney,
+      });
+      return res.json({ success: true, userAccount, transferAccount, message });
     }
   );
 };
-
-// exports.refresh = async (req, res, next) => {
-//   const { refreshToken, accessToken } = req.body;
-//   jwt.verify(
-//     accessToken,
-//     process.env.JWT_SECRET,
-//     { ignoreExpiration: true },
-//     async function (err, payload) {
-//       const { id } = payload;
-//       const customer = await Customer.findById(id);
-//       if (!customer) {
-//         res.status(400).json({ success: false, err: 'User not exists' });
-//       }
-//       if (customer.refreshToken === refreshToken) {
-//         const newAccessToken = customer.SignJwtToken();
-//         res.status(202).json({ accessToken: newAccessToken, refreshToken });
-//       }
-//       res.status(402).json({ success: false, err: 'Invalid refresh token' });
-//     }
-//   );
-// };
-
 var generateOTP = rn.generator({
   min: 10000,
   max: 99999,
