@@ -5,6 +5,7 @@ import { DownOutlined } from '@ant-design/icons';
 import classes from './NavigationItem.module.css';
 
 const UserNavItem = (props) => {
+	console.log('props', props);
 	const menu = (
 		<Menu>
 			<Menu.Item key="0">
@@ -24,7 +25,7 @@ const UserNavItem = (props) => {
 		<li style={{ width: '-webkit-fill-available' }}>
 			<Dropdown overlay={menu} trigger={[ 'click' ]}>
 				<a className="ant-dropdown-link" onClick={(e) => e.preventDefault()} style={{ lineHeight: '56px' }}>
-					Thienho <DownOutlined />
+					{props.authData.userName} <DownOutlined />
 				</a>
 				{/* <a>
 				<div style={{ display: 'inline-block' }}>Thienho</div>

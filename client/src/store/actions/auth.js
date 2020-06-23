@@ -20,7 +20,13 @@ export const authFaild = () => {
 export const authSuccess = (data) => {
 	return {
 		type: actionTypes.AUTH_SUCCESS,
-		accessToken: data.accesstoken
+		accessToken: data.accesstoken,
+		authData: {
+			userName: data.name,
+			stk: data.stk,
+			email: data.email
+		},
+		access: data.userAccess
 	};
 };
 
@@ -31,14 +37,14 @@ export const changeAccessToken = (accessToken) => {
 	};
 };
 
-export const authLogin = (data) => {
+export const authLogin = (data, history) => {
 	return (dispatch) => {
 		dispatch(authStart());
 		axios
 			.post('/auth/login', data)
 			.then((result) => {
-				console.log(result.data.refreshToken);
 				myStorage.setItem('refreshToken', result.data.refreshToken);
+				history.push('/');
 				notification.success({
 					message: 'Đăng nhập thành công',
 					placement: 'bottom'

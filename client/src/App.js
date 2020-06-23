@@ -16,7 +16,7 @@ export default class App extends React.Component {
 					This is Home
 				</Route>
 				<Route path="/login" exact component={Login} />
-				<Redirect path="/" />
+				<Route path="*">Not found</Route>
 			</Switch>
 		);
 		return <Layout>{routes}</Layout>;

@@ -13,7 +13,12 @@ const reducer = (state = initialState, action) => {
 		case actionTypes.AUTH_FAIL:
 			return updateObject(state, { loading: false });
 		case actionTypes.AUTH_SUCCESS:
-			return updateObject(state, { loading: false, accessToken: action.accessToken });
+			return updateObject(state, {
+				loading: false,
+				accessToken: action.accessToken,
+				authData: action.authData,
+				access: action.access
+			});
 		case actionTypes.CHANGE_ACCESS_TOKEN:
 			return updateObject(state, { accessToken: action.accessToken });
 		default:

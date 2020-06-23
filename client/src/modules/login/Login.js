@@ -25,7 +25,7 @@ const tailLayout = {
 
 const Login = (props) => {
 	const onFinish = (values) => {
-		props.authLogin(values);
+		props.authLogin(values, props.history);
 	};
 
 	return (
@@ -105,7 +105,7 @@ const mapStateToProps = (state) => {
 };
 const mapDispatchToProps = (dispatch) => {
 	return {
-		authLogin: (loginInfo) => dispatch(authActions.authLogin(loginInfo))
+		authLogin: (loginInfo, history) => dispatch(authActions.authLogin(loginInfo, history))
 	};
 };
 export default connect(mapStateToProps, mapDispatchToProps)(Login);
