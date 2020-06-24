@@ -2,6 +2,7 @@ const generator = require('creditcard-generator');
 const PaymentAccount = require('../models/paymentAccount');
 const History = require('../models/history');
 const Customer = require('../models/customer');
+const DeptReminder = require('../models/deptReminder');
 const paymentController = require('../controllers/paymentController');
 const sendEmail = require('../utils/sendEmail');
 const rn = require('random-number');
@@ -57,6 +58,66 @@ exports.getListDeptReminderRemind = (req, res, next) => {
       res.json(listDeptReminders);
     })
     .catch((err) => console.log(err));
+};
+
+exports.deleteDeptReminder = async (req, res, next) => {
+  const { id, message } = req.body;
+  const deptReminder = await DeptReminder.findById(id);
+  const accessToken = req.headers['x-access-token'];
+  if (!id) {
+    res.status(400).json({ err: 'Dept reminder not exist' });
+  }
+  try {
+    jwt.verify(
+      accessToken,
+      process.env.JWT_SECRET,
+      { ignoreExpiration: true },
+      async function (err, payload) {
+        const idDeptRemind = payload.id;
+        const stkremind = await PaymentAccount.findOne({
+          stk: deptReminder.stkRemind,
+        });
+        const stkwasremined = await PaymentAccount.findOne({
+          stk: deptReminder.stkWasRemined,
+        });
+        const customerRemind = await Customer.findOne({
+          paymentAccountId: stkremind,
+        });
+        const customerWasRemined = await Customer.findOne({
+          paymentAccountId: stkwasremined,
+        });
+        const listRemindUpdate = customerRemind.listDeptReminders.filter(
+          (item) => item.deptReminderId.toString() !== id.toString()
+        );
+        const listWasRemindUpdate = customerWasRemined.listDeptReminders.filter(
+          (item) => item.deptReminderId.toString() !== id.toString()
+        );
+        const customerRemindNotify = customerRemind.notifications;
+        customerRemind.listDeptReminders = listRemindUpdate;
+        customerWasRemined.listDeptReminders = listWasRemindUpdate;
+        // Them notify
+        if (idDeptRemind === customerRemind.id)
+          customerWasRemined.notifications.push({
+            notify:
+              `So tai khoan ${deptReminder.stkRemind} da xoa nhac no voi noi dung:  ` +
+              message,
+          });
+        else
+          customerRemind.notifications.push({
+            notify:
+              `So tai khoan ${deptReminder.stkWasRemined} da xoa nhac no voi noi dung:  ` +
+              message,
+          });
+        await customerWasRemined.save();
+        await customerRemind.save();
+        await deptReminder.remove();
+      }
+    );
+    res.status(202).json({ succes: true });
+  } catch (err) {
+    console.log(err);
+    res.status(400).json({ success: false, err: err });
+  }
 };
 
 exports.postCreateCustomer = async (req, res, next) => {
@@ -118,48 +179,56 @@ exports.sendOTP = async (req, res, next) => {
 
 exports.transferMoney = async (req, res, next) => {
   const accessToken = req.headers['x-access-token'];
-  const { stk, amountOfMoney, message, otpcode } = req.body;
-  jwt.verify(
-    accessToken,
-    process.env.JWT_SECRET,
-    { ignoreExpiration: true },
-    async function (err, payload) {
-      const { id } = payload;
-      const customer = await Customer.findById(id);
-      if (!customer) {
-        return res.status(400).json({ success: false, err: 'User not exists' });
-      }
-      if (customer.OTP !== otpcode) {
-        return res.status(403).json({ success: false, err: 'Invalid OTP' });
-      }
-      const userAccount = await PaymentAccount.findById(
-        customer.paymentAccountId
-      );
-      const allFee = amountOfMoney + parseInt(process.env.FEETRANSFER);
-      if (userAccount.balance < allFee)
-        return res
-          .status(406)
-          .json({ success: false, err: 'You dont have enough money' });
+  const { stk, amountOfMoney, message, otpcode, category } = req.body;
+  try {
+    jwt.verify(
+      accessToken,
+      process.env.JWT_SECRET,
+      { ignoreExpiration: true },
+      async function (err, payload) {
+        const { id } = payload;
+        const customer = await Customer.findById(id);
+        if (!customer) {
+          return res
+            .status(400)
+            .json({ success: false, err: 'User not exists' });
+        }
+        if (customer.OTP !== otpcode) {
+          return res.status(403).json({ success: false, err: 'Invalid OTP' });
+        }
+        const userAccount = await PaymentAccount.findById(
+          customer.paymentAccountId
+        );
+        const allFee = amountOfMoney + parseInt(process.env.FEETRANSFER);
+        if (userAccount.balance < allFee)
+          return res
+            .status(406)
+            .json({ success: false, err: 'You dont have enough money' });
 
-      const transferAccount = await PaymentAccount.findOne({ stk: stk });
-      transferAccount.balance = transferAccount.balance + amountOfMoney;
-      userAccount.balance = userAccount.balance - allFee;
-      customer.OTP = undefined;
-      await customer.save();
-      await userAccount.save();
-      await transferAccount.save();
-      await History.create({
-        operator: 'Customer',
-        accountSender: userAccount.stk,
-        sender: userAccount.name,
-        accountReceive: stk,
-        receiver: transferAccount.name,
-        message,
-        amountOfMoney,
-      });
-      return res.json({ success: true, userAccount, transferAccount, message });
-    }
-  );
+        const transferAccount = await PaymentAccount.findOne({ stk: stk });
+        transferAccount.balance = transferAccount.balance + amountOfMoney;
+        userAccount.balance = userAccount.balance - allFee;
+        customer.OTP = undefined;
+        await customer.save();
+        await userAccount.save();
+        await transferAccount.save();
+        await History.create({
+          operator: 'Customer',
+          accountSender: userAccount.stk,
+          sender: userAccount.name,
+          accountReceive: stk,
+          receiver: transferAccount.name,
+          message,
+          amountOfMoney,
+          category,
+        });
+        res.json({ success: true, userAccount, transferAccount, message });
+      }
+    );
+  } catch (err) {
+    console.log(err);
+    res.json({ success: false, err });
+  }
 };
 var generateOTP = rn.generator({
   min: 10000,

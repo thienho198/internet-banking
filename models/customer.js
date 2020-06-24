@@ -45,6 +45,17 @@ const customerSchema = new Schema({
       },
     },
   ],
+  notifications: [
+    {
+      notify: {
+        type: Schema.Types.String,
+      },
+      createdAt: {
+        type: Schema.Types.Date,
+        default: Date.now(),
+      },
+    },
+  ],
 });
 
 //Only allow one email to register

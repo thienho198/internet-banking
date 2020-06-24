@@ -37,6 +37,7 @@ exports.login = async (req, res, next) => {
       success: true,
       userAccess,
       email,
+      id: user.id,
       name: user.name,
       stk: paymentAccount.stk,
       accesstoken,

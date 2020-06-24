@@ -12,4 +12,9 @@ router.post(
   bankerController.addMoneyByEmail
 );
 router.post('/banker/addMoney', verifyBanker, bankerController.addMoneyByStk);
+router.get(
+  '/banker/getAllCustomer',
+  verifyBanker,
+  bankerController.getAllCustomer
+);
 module.exports = router;

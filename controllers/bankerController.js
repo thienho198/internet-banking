@@ -72,3 +72,12 @@ exports.addMoneyByStk = async (req, res, next) => {
     return res.status(400).json({ success: false, err: 'server error' });
   }
 };
+
+exports.getAllCustomer = async (req, res, next) => {
+  try {
+    const customer = await Customer.find();
+    res.status(200).json({ success: true, data: customer });
+  } catch (err) {
+    res.status(400).json({ success: false, err });
+  }
+};
