@@ -6,21 +6,21 @@ import UserNavItem from './navigationItem/UserNavItem';
 import classes from './NavigationItems.module.css';
 
 const NavigationItems = (props) => {
-	const { isAuthenticated, authData } = props;
+	const { isAuthenticated, authData, access } = props;
 	console.log(isAuthenticated);
 	return (
 		<ul className={classes.navigationItems}>
 			<NavigationItem link="/" exact>
 				Trang chủ
 			</NavigationItem>
-			{isAuthenticated ? authData.access === 'customer' ? (
+			{isAuthenticated ? access === 'customer' ? (
 				<React.Fragment>
 					<NavigationItem link="/history-customer">Lịch Sử Giao Dịch</NavigationItem>
 					<NavigationItem link="/transfer-customer">Chuyển Khoản</NavigationItem>
 					<NavigationItem link="/remind">Quản Lý Nhắc Nợ</NavigationItem>
 					<UserNavItem authData={props.authData} />
 				</React.Fragment>
-			) : authData.access === 'employee' ? (
+			) : access === 'employee' ? (
 				<React.Fragment>
 					<NavigationItem link="/create-account">Tạo Tài Khoản</NavigationItem>
 					<NavigationItem link="/add-money">Nạp Tiền</NavigationItem>
@@ -43,7 +43,8 @@ const NavigationItems = (props) => {
 const mapStateToProps = (state) => {
 	return {
 		isAuthenticated: state.auth.accessToken !== null,
-		authData: state.auth.authData
+		authData: state.auth.authData,
+		access: state.auth.access
 	};
 };
 

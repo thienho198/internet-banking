@@ -1,8 +1,11 @@
 import React from 'react';
 import { Menu, Dropdown } from 'antd';
 import { DownOutlined } from '@ant-design/icons';
+import { connect } from 'react-redux';
 
+import * as authActions from '../../../../store/actions/auth';
 import classes from './NavigationItem.module.css';
+import { toastSuccess } from '../../../../util/AppUtil';
 
 const UserNavItem = (props) => {
 	console.log('props', props);
@@ -12,10 +15,12 @@ const UserNavItem = (props) => {
 				<button
 					onClick={() => {
 						//remove accessToken in store
+						props.logout();
+						toastSuccess('Đăng xuất thành công');
 						//remove refreshToken in local
 					}}
 				>
-					Logout
+					Đăng xuất
 				</button>
 			</Menu.Item>
 		</Menu>
@@ -38,4 +43,9 @@ const UserNavItem = (props) => {
 	);
 };
 
-export default UserNavItem;
+const mapDispatchToProps = (dispatch) => {
+	return {
+		logout: () => dispatch(authActions.authLogout())
+	};
+};
+export default connect(null, mapDispatchToProps)(UserNavItem);

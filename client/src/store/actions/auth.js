@@ -37,6 +37,13 @@ export const changeAccessToken = (accessToken) => {
 	};
 };
 
+export const authLogout = () => {
+	myStorage.setItem('refreshToken', null);
+	return {
+		type: actionTypes.AUTH_LOGOUT
+	};
+};
+
 export const authLogin = (data, history) => {
 	return (dispatch) => {
 		dispatch(authStart());

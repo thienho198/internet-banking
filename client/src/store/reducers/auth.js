@@ -3,7 +3,8 @@ import * as actionTypes from '../actions/actionTypes';
 
 const initialState = {
 	accessToken: null,
-	loading: false
+	loading: false,
+	access: ''
 };
 
 const reducer = (state = initialState, action) => {
@@ -21,6 +22,8 @@ const reducer = (state = initialState, action) => {
 			});
 		case actionTypes.CHANGE_ACCESS_TOKEN:
 			return updateObject(state, { accessToken: action.accessToken });
+		case actionTypes.AUTH_LOGOUT:
+			return updateObject(state, { accessToken: null });
 		default:
 			return state;
 	}
