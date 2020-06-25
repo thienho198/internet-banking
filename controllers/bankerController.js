@@ -2,6 +2,7 @@ const Banker = require('../models/banker');
 const Customer = require('../models/customer');
 const History = require('../models/history');
 const PaymentAccount = require('../models/paymentAccount');
+const jwt = require('jsonwebtoken');
 
 exports.create = async (req, res, next) => {
   const { name, email, role, password } = req.body;
@@ -10,6 +11,7 @@ exports.create = async (req, res, next) => {
       .status(400)
       .json({ success: false, msg: 'Please add name, email and password' });
   }
+  const accessToken = req.headers['x-access-token'];
   const customer = await Customer.findOne({ email: email });
   if (customer) {
     return res
@@ -17,8 +19,22 @@ exports.create = async (req, res, next) => {
       .json({ success: false, err: 'This email belong to one of customer' });
   }
   try {
-    const banker = await Banker.create({ name, email, role, password });
-    res.json({ success: true });
+    jwt.verify(
+      accessToken,
+      process.env.JWT_SECRET,
+      { ignoreExpiration: true },
+      async function (err, payload) {
+        const { id } = payload;
+        const banker = await Banker.findById(id);
+        if (banker.role === 'employee')
+          return res
+            .status(401)
+            .json({ success: false, err: 'Employee not allow to access' });
+
+        await Banker.create({ name, email, role, password });
+        res.json({ success: true });
+      }
+    );
   } catch (err) {
     console.log(err);
     if (err.errors.email) {
@@ -70,6 +86,20 @@ exports.addMoneyByStk = async (req, res, next) => {
   } catch (err) {
     console.log(err);
     return res.status(400).json({ success: false, err: 'server error' });
+  }
+};
+
+exports.getHistoryAccount = async (req, res, next) => {
+  const { stk } = req.body.toString();
+  try {
+    const history = await History.find();
+    const historyAccount = history.filter(
+      (item) => item.accountSender === stk || item.accountReceive === stk
+    );
+    res.status(200).json({ success: true, historyAccount });
+  } catch (err) {
+    console.log(err);
+    res.status(400).json({ success: false, err });
   }
 };
 

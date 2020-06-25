@@ -34,6 +34,7 @@ exports.getListDeptReminderWasRemined = (req, res, next) => {
     })
     .catch((err) => console.log(err));
 };
+
 exports.getListDeptReminderRemind = (req, res, next) => {
   const customerId = req.query.id;
   Customer.findById(customerId)
@@ -117,6 +118,53 @@ exports.deleteDeptReminder = async (req, res, next) => {
   } catch (err) {
     console.log(err);
     res.status(400).json({ success: false, err: err });
+  }
+};
+
+exports.getHistory = async (req, res, next) => {
+  const accessToken = req.headers['x-access-token'];
+  try {
+    jwt.verify(
+      accessToken,
+      process.env.JWT_SECRET,
+      { ignoreExpiration: true },
+      async function (err, payload) {
+        const { id } = payload;
+        console.log(id);
+        const customer = await Customer.findById(id);
+        const paymentAccount = await PaymentAccount.findById(
+          customer.paymentAccountId
+        );
+        const history = await History.find();
+        const historyReceive = history.filter(
+          (item) =>
+            item.accountReceive === paymentAccount.stk &&
+            item.bankReceiver === 'G16BANK'
+        );
+        const historyTransfer = history.filter(
+          (item) =>
+            item.accountSender === paymentAccount.stk &&
+            item.bankSender === 'G16BANK'
+        );
+        const historyDebtRemind = history.filter(
+          (item) =>
+            ((item.accountReceive === paymentAccount.stk &&
+              item.bankReceiver === 'G16BANK') ||
+              (item.accountSender === paymentAccount.stk &&
+                item.bankSender === 'G16BANK')) &&
+            item.category === 'DeptPay'
+        );
+        res.json({
+          success: true,
+          historyReceive,
+          historyTransfer,
+          historyDebtRemind,
+        });
+      }
+    );
+  } catch (err) {
+    console.log(err);
+    res.json({ err });
   }
 };
 
