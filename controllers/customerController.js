@@ -121,6 +121,121 @@ exports.deleteDeptReminder = async (req, res, next) => {
   }
 };
 
+exports.createListRemind = async (req, res, next) => {
+  const accessToken = req.headers['x-access-token'];
+  let { stk, nameRemind, bank } = req.body;
+  try {
+    jwt.verify(
+      accessToken,
+      process.env.JWT_SECRET,
+      { ignoreExpiration: true },
+      async function (err, payload) {
+        const { id } = payload;
+        const customer = await Customer.findById(id);
+        const findStk = customer.listAccountRemind.find(
+          (item) => item.stk === stk.toString()
+        );
+        if (!bank || bank === 'G16BANK') {
+          const accountRemind = await PaymentAccount.findOne({ stk });
+          if (!accountRemind)
+            return res.status(400).json({
+              success: false,
+              err: 'This account does not exist in bank',
+            });
+          if (!nameRemind) {
+            nameRemind = accountRemind.name;
+          }
+        }
+        if (!findStk) {
+          customer.listAccountRemind.push({ stk, nameRemind, bank });
+          await customer.save();
+          return res
+            .status(200)
+            .json({ success: true, data: customer.listAccountRemind });
+        }
+        return res.status(400).json({
+          success: false,
+          err: 'This account is already in the remind list',
+        });
+      }
+    );
+  } catch (err) {
+    res.status(400).json({ success: false, err });
+  }
+};
+
+exports.updateListRemind = async (req, res, next) => {
+  const accessToken = req.headers['x-access-token'];
+  let { stk, nameRemind, bank } = req.body;
+  try {
+    jwt.verify(
+      accessToken,
+      process.env.JWT_SECRET,
+      { ignoreExpiration: true },
+      async function (err, payload) {
+        const { id } = payload;
+        const customer = await Customer.findById(id);
+        let check = false;
+        let updateListRemind = customer.listAccountRemind.map((item) => {
+          if (item.stk === stk.toString()) {
+            item.nameRemind = nameRemind;
+            item.bank = bank;
+            check = true;
+          }
+          return item;
+        });
+        if (check) {
+          customer.listAccountRemind = updateListRemind;
+          await customer.save();
+          return res
+            .status(200)
+            .json({ success: true, data: customer.listAccountRemind });
+        }
+        return res.status(400).json({
+          success: false,
+          err: 'Account not found in list',
+        });
+      }
+    );
+  } catch (err) {
+    res.status(400).json({ success: false, err });
+  }
+};
+
+exports.deleteListRemind = async (req, res, next) => {
+  const accessToken = req.headers['x-access-token'];
+  let { stk } = req.body;
+  try {
+    jwt.verify(
+      accessToken,
+      process.env.JWT_SECRET,
+      { ignoreExpiration: true },
+      async function (err, payload) {
+        const { id } = payload;
+        const customer = await Customer.findById(id);
+        let check = false;
+        let updateListRemind = customer.listAccountRemind.filter((item) => {
+          if (item.stk === stk.toString()) check = true;
+          return item.stk !== stk.toString();
+        });
+        if (check) {
+          customer.listAccountRemind = updateListRemind;
+          await customer.save();
+          return res
+            .status(200)
+            .json({ success: true, data: customer.listAccountRemind });
+        }
+        return res.status(400).json({
+          success: false,
+          err: 'Account not found in list',
+        });
+      }
+    );
+  } catch (err) {
+    res.status(400).json({ success: false, err });
+  }
+};
+
 exports.getHistory = async (req, res, next) => {
   const accessToken = req.headers['x-access-token'];
   try {
@@ -130,7 +245,6 @@ exports.getHistory = async (req, res, next) => {
       { ignoreExpiration: true },
       async function (err, payload) {
         const { id } = payload;
-        console.log(id);
         const customer = await Customer.findById(id);
         const paymentAccount = await PaymentAccount.findById(
           customer.paymentAccountId

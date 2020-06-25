@@ -5,7 +5,7 @@ const historySchema = new Schema({
   category: {
     type: String,
     required: true,
-    enum: ['Transfer', 'DeptPay'],
+    enum: ['Transfer', 'DeptPay', 'InternetBank'],
     default: 'Transfer',
   },
   operator: {

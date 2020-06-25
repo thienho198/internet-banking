@@ -56,6 +56,21 @@ const customerSchema = new Schema({
       },
     },
   ],
+  listAccountRemind: [
+    {
+      stk: {
+        type: Schema.Types.String,
+      },
+      nameRemind: {
+        type: Schema.Types.String,
+      },
+      bank: {
+        type: Schema.Types.String,
+        enum: ['G16BANK', 'RGPBANK', 'PGPBANK'],
+        default: 'G16BANK',
+      },
+    },
+  ],
 });
 
 //Only allow one email to register
