@@ -27,9 +27,13 @@ const UserNavItem = (props) => {
 	);
 	//#region render
 	return (
-		<li style={{ width: '-webkit-fill-available' }}>
+		<li>
 			<Dropdown overlay={menu} trigger={[ 'click' ]}>
-				<a className="ant-dropdown-link" onClick={(e) => e.preventDefault()} style={{ lineHeight: '56px' }}>
+				<a
+					className="ant-dropdown-link"
+					onClick={(e) => e.preventDefault()}
+					style={{ lineHeight: '56px', whiteSpace: 'nowrap' }}
+				>
 					{props.authData.userName} <DownOutlined />
 				</a>
 				{/* <a>
