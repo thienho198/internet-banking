@@ -38,6 +38,7 @@ exports.login = async (req, res, next) => {
       userAccess,
       email,
       id: user.id,
+      listAccountRemind: user.listAccountRemind,
       name: user.name,
       stk: paymentAccount.stk,
       accesstoken,
