@@ -1,0 +1,26 @@
+.FormArea {
+	height: calc(100vh - 56px);
+	width: 100%;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+.Form {
+	border: 1px solid #ddd;
+	padding: 20px;
+	padding-bottom: 5px;
+	width: 400px;
+	margin-bottom: 200px;
+}
+.btnForm {
+	width: 60px;
+	margin: 0 auto;
+}
+.title {
+	font-size: 20px;
+	text-align: center;
+	font-weight: bold;
+	margin-bottom: 30px;
+	text-transform: uppercase;
+	color: #1890ff;
+}

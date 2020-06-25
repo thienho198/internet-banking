@@ -1,16 +1,12 @@
-import React from 'react';
-import { connect } from 'react-redux';
+import React, { useState } from 'react';
 import { Form, Input, Button, Checkbox, Spin } from 'antd';
 import 'antd/dist/antd.css';
 
-import axios from '../../axios/mainAxios';
-import classes from './Login.module.css';
-import loginImg from '../../asset/images/person.png';
-import * as authActions from '../../store/actions/auth';
+import classes from './CreateAccount.module.css';
 
 const layout = {
 	labelCol: {
-		span: 6
+		span: 7
 	},
 	wrapperCol: {
 		span: 20
@@ -18,23 +14,24 @@ const layout = {
 };
 const tailLayout = {
 	wrapperCol: {
-		offset: 6,
+		offset: 10,
 		span: 10
 	}
 };
 
-const Login = (props) => {
-	const onFinish = (values) => {
-		props.authLogin(values, props.history);
-	};
+const CreateAccount = (props) => {
+	//#region state
+	const [ isMask, setIsMask ] = useState(false);
 
+	//#region events
+	const onFinish = (values) => {};
+
+	//#region render
 	return (
-		<div className={classes.loginArea}>
-			<Spin spinning={props.authLoading}>
-				<div className={classes.loginForm}>
-					<div className={classes.loginImage}>
-						<img src={loginImg} alt="loginLogo" />
-					</div>
+		<div className={classes.FormArea}>
+			<Spin spinning={isMask}>
+				<div className={classes.Form}>
+					<div className={classes.title}>Tạo tài khoản người dùng</div>
 					<Form
 						{...layout}
 						name="basic"
@@ -43,6 +40,19 @@ const Login = (props) => {
 						}}
 						onFinish={onFinish}
 					>
+						<Form.Item
+							label="Họ tên"
+							name="name"
+							rules={[
+								{
+									required: true,
+									message: 'Điền đầy đủ thông tin'
+								}
+							]}
+						>
+							<Input placeholder="Nhập họ tên" />
+						</Form.Item>
+
 						<Form.Item
 							label="Email"
 							name="email"
@@ -53,13 +63,29 @@ const Login = (props) => {
 								},
 								{
 									type: 'email',
-									message: 'Không đúng định dạng email'
+									message: 'Please enter'
 								}
 							]}
 						>
-							<Input placeholder="hdh@gmail.com" />
+							<Input placeholder="Email" />
 						</Form.Item>
 
+						<Form.Item
+							label="Số điện thoại"
+							name="phoneNumber"
+							rules={[
+								{
+									required: true,
+									message: 'Điền đầy đủ thông tin'
+								},
+								{
+									type: 'number',
+									message: 'Không được chứa các kí tự khác ngoài số'
+								}
+							]}
+						>
+							<Input placeholder="Nhập số điện thoại" />
+						</Form.Item>
 						<Form.Item
 							label="Mật khẩu"
 							name="password"
@@ -75,7 +101,7 @@ const Login = (props) => {
 
 						<Form.Item {...tailLayout}>
 							<Button type="primary" htmlType="submit">
-								Đăng nhập
+								Tạo
 							</Button>
 						</Form.Item>
 					</Form>
@@ -98,14 +124,4 @@ const Login = (props) => {
 	);
 };
 
-const mapStateToProps = (state) => {
-	return {
-		authLoading: state.auth.loading
-	};
-};
-const mapDispatchToProps = (dispatch) => {
-	return {
-		authLogin: (loginInfo, history) => dispatch(authActions.authLogin(loginInfo, history))
-	};
-};
-export default connect(mapStateToProps, mapDispatchToProps)(Login);
+export default CreateAccount;

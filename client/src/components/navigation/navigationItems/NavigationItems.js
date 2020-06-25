@@ -22,7 +22,7 @@ const NavigationItems = (props) => {
 				</React.Fragment>
 			) : access === 'employee' ? (
 				<React.Fragment>
-					<NavigationItem link="/create-account">Tạo Tài Khoản</NavigationItem>
+					<NavigationItem link="/create-account/customer">Tạo Tài Khoản</NavigationItem>
 					<NavigationItem link="/add-money">Nạp Tiền</NavigationItem>
 					<NavigationItem link="/history-admin">Lịch sử giao dịch</NavigationItem>
 					<UserNavItem authData={props.authData} />
