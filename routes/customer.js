@@ -11,6 +11,7 @@ router.get(
   protect,
   customerController.getListDeptReminderWasRemined
 );
+router.get('/customer/history', protect, customerController.getHistory);
 router.delete(
   '/customer/deleteDeptReminder',
   protect,
