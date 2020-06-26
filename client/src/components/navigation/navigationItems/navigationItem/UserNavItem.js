@@ -8,27 +8,23 @@ import classes from './NavigationItem.module.css';
 import { toastSuccess } from '../../../../util/AppUtil';
 
 const UserNavItem = (props) => {
-	console.log('props', props);
+	//#region events
+	const onMenuClicked = ({ key }) => {
+		if (key === '0') {
+			props.logout();
+			toastSuccess('Đăng xuất thành công');
+		}
+	};
+	//#region render
 	const menu = (
-		<Menu>
-			<Menu.Item key="0">
-				<button
-					onClick={() => {
-						//remove accessToken in store
-						props.logout();
-						toastSuccess('Đăng xuất thành công');
-						//remove refreshToken in local
-					}}
-				>
-					Đăng xuất
-				</button>
-			</Menu.Item>
+		<Menu onClick={onMenuClicked}>
+			<Menu.Item key="0">Đăng xuất</Menu.Item>
 		</Menu>
 	);
-	//#region render
+
 	return (
 		<li>
-			<Dropdown overlay={menu} trigger={[ 'click' ]}>
+			<Dropdown overlay={menu}>
 				<a
 					className="ant-dropdown-link"
 					onClick={(e) => e.preventDefault()}
@@ -36,12 +32,6 @@ const UserNavItem = (props) => {
 				>
 					{props.authData.userName} <DownOutlined />
 				</a>
-				{/* <a>
-				<div style={{ display: 'inline-block' }}>Thienho</div>
-				<div style={{ display: 'inline-block' }}>
-					<DownOutlined />
-				</div>
-			</a> */}
 			</Dropdown>
 		</li>
 	);

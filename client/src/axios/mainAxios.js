@@ -5,7 +5,7 @@ import * as authActions from '../store/actions/auth';
 
 const myStorage = window.localStorage;
 
-const instance = axios.create({});
+const instance = axios.create({ timeout: 3000 });
 
 instance.interceptors.request.use((config) => {
 	const state = store.getState();
