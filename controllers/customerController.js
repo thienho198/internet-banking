@@ -236,7 +236,41 @@ exports.deleteListRemind = async (req, res, next) => {
   }
 };
 
-exports.getHistory = async (req, res, next) => {
+exports.historyDebtRemind = async (req, res, next) => {
+  const accessToken = req.headers['x-access-token'];
+  try {
+    jwt.verify(
+      accessToken,
+      process.env.JWT_SECRET,
+      { ignoreExpiration: true },
+      async function (err, payload) {
+        const { id } = payload;
+        const customer = await Customer.findById(id);
+        const paymentAccount = await PaymentAccount.findById(
+          customer.paymentAccountId
+        );
+        const history = await History.find();
+        const historyDebtRemind = history.filter(
+          (item) =>
+            ((item.accountReceive === paymentAccount.stk &&
+              item.bankReceiver === 'G16BANK') ||
+              (item.accountSender === paymentAccount.stk &&
+                item.bankSender === 'G16BANK')) &&
+            item.category === 'DeptPay'
+        );
+        res.status(200).json({
+          success: true,
+          historyDebtRemind,
+        });
+      }
+    );
+  } catch (err) {
+    console.log(err);
+    res.status(400).json({ err });
+  }
+};
+
+exports.historyReceive = async (req, res, next) => {
   const accessToken = req.headers['x-access-token'];
   try {
     jwt.verify(
@@ -255,30 +289,46 @@ exports.getHistory = async (req, res, next) => {
             item.accountReceive === paymentAccount.stk &&
             item.bankReceiver === 'G16BANK'
         );
-        const historyTransfer = history.filter(
-          (item) =>
-            item.accountSender === paymentAccount.stk &&
-            item.bankSender === 'G16BANK'
-        );
-        const historyDebtRemind = history.filter(
-          (item) =>
-            ((item.accountReceive === paymentAccount.stk &&
-              item.bankReceiver === 'G16BANK') ||
-              (item.accountSender === paymentAccount.stk &&
-                item.bankSender === 'G16BANK')) &&
-            item.category === 'DeptPay'
-        );
-        res.json({
+        res.status(200).json({
           success: true,
           historyReceive,
-          historyTransfer,
-          historyDebtRemind,
         });
       }
     );
   } catch (err) {
     console.log(err);
-    res.json({ err });
+    res.status(400).json({ err });
+  }
+};
+
+exports.historyTransfer = async (req, res, next) => {
+  const accessToken = req.headers['x-access-token'];
+  try {
+    jwt.verify(
+      accessToken,
+      process.env.JWT_SECRET,
+      { ignoreExpiration: true },
+      async function (err, payload) {
+        const { id } = payload;
+        const customer = await Customer.findById(id);
+        const paymentAccount = await PaymentAccount.findById(
+          customer.paymentAccountId
+        );
+        const history = await History.find();
+        const historyTransfer = history.filter(
+          (item) =>
+            item.accountSender === paymentAccount.stk &&
+            item.bankSender === 'G16BANK'
+        );
+        res.status(200).json({
+          success: true,
+          historyTransfer,
+        });
+      }
+    );
+  } catch (err) {
+    console.log(err);
+    res.status(400).json({ err });
   }
 };
 

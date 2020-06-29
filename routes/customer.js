@@ -33,7 +33,21 @@ router.get(
   protect,
   customerController.getListDeptReminderWasRemined
 );
-router.get('/customer/history', protect, customerController.getHistory);
+router.get(
+  '/customer/historyDebtRemind',
+  protect,
+  customerController.historyDebtRemind
+);
+router.get(
+  '/customer/historyReceive',
+  protect,
+  customerController.historyReceive
+);
+router.get(
+  '/customer/historyTransfer',
+  protect,
+  customerController.historyTransfer
+);
 router.delete(
   '/customer/deleteDeptReminder',
   protect,
