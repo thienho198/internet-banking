@@ -1,6 +1,7 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import { Form, Input, Button, Checkbox, Spin } from 'antd';
+import { Link } from 'react-router-dom';
 import 'antd/dist/antd.css';
 
 import axios from '../../axios/mainAxios';
@@ -78,6 +79,9 @@ const Login = (props) => {
 								Đăng nhập
 							</Button>
 						</Form.Item>
+						<div style={{ textAlign: 'right' }}>
+							<Link to="/forgot-password"> Quên mật khẩu </Link>
+						</div>
 					</Form>
 					{/* <Button
 						type="primary"

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Form, Input, Button, Checkbox, Spin } from 'antd';
 import 'antd/dist/antd.css';
+import _ from 'lodash';
 
 import axios from '../../../axios/mainAxios';
 import { toastSuccess, toastError } from '../../../util/AppUtil';
@@ -28,6 +29,7 @@ const AddMoneyByStk = (props) => {
 	//#region events
 	const onFinish = (values, form) => {
 		values.amountOfMoney = Number(values.amountOfMoney);
+		values.stk = _.trim(values.stk);
 		console.log(values);
 		setIsMask(true);
 		axios

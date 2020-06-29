@@ -32,7 +32,7 @@ const NavigationItems = (props) => {
 					>
 						Nạp Tiền
 					</NavigationItem>
-					<NavigationItem link="/history-admin">Lịch sử giao dịch</NavigationItem>
+					<NavigationItem link="/history-employee">Lịch sử giao dịch</NavigationItem>
 					<UserNavItem authData={props.authData} />
 				</React.Fragment>
 			) : (
