@@ -68,7 +68,6 @@ exports.bankTransferPgp = async (req, res, next) => {
         return res
           .status(406)
           .json({ success: false, err: 'You dont have enough money' });
-      //const transferAccount = await PaymentAccount.findOne({ stk: stk });
       body = {
         data: {
           des_username,
@@ -84,16 +83,13 @@ exports.bankTransferPgp = async (req, res, next) => {
         console.log('clearTEXT ', cleartext);
         const link =
           'https://salty-meadow-17297.herokuapp.com/customer/recharge';
-        const response = await sendRequestPgp({ cleartext }, link);
-        const re = response.data;
-        console.log('REsponse ', re);
+        const responseData = await sendRequestPgp({ cleartext }, link);
+        const re = responseData.data;
         const data = JSON.stringify(re.data);
         const verify = crypto.createVerify('SHA256');
         verify.write(data);
         verify.end();
-        console.log('VERIFY ', verify);
         let check = verify.verify(constant.RGP_PUBLICKEY, re.signature, 'hex');
-        console.log('checkkey', check);
         if (check === true) res.json({ success: true, re });
         res.json({ success: false, err: 'Wrong verify' });
       } catch (err) {
@@ -134,6 +130,5 @@ const sendRequestPgp = async (body, link) => {
       'x-signature': sig,
     },
   });
-  console.log('requestTTTT', request);
   return request;
 };
