@@ -7,6 +7,7 @@ const crypto = require('crypto');
 const openpgp = require('openpgp');
 const { response } = require('express');
 const constant = require('../config/env');
+const { verifyRgp } = require('../utils/bankFunction');
 
 exports.protect = async (req, res, next) => {
   let token = req.headers['x-access-token'];
@@ -51,23 +52,23 @@ exports.protectBank = async (req, res, next) => {
   }
 };
 
-exports.protectKey = async (req, res, next) => {
+exports.protectRgp = async (req, res, next) => {
   try {
     let data = JSON.stringify(req.body.data);
     let signature = req.body.signature;
     console.log('data: ' + data);
     console.log('sig: ' + req.body.signature);
-    const verify = crypto.createVerify('SHA256');
-    verify.write(data);
-    verify.end();
-    let check = verify.verify(constant.RGP_PUBLICKEY, signature, 'hex');
-    console.log('check' + check);
+    // const verify = crypto.createVerify('SHA256');
+    // verify.write(data);
+    // verify.end();
+    // let check = verify.verify(constant.RGP_PUBLICKEY, signature, 'hex');
+    let check = await verifyRgp(data, constant.RGP_PUBLICKEY, signature);
     if (check) {
       next();
     } else {
       return res
         .status(401)
-        .json({ err: 'Wrong verify. You dont allow to access' });
+        .json({ err: 'Wrong verify. You have no right to access' });
     }
   } catch (error) {
     console.log(error);
@@ -75,16 +76,23 @@ exports.protectKey = async (req, res, next) => {
   }
 };
 
+exports.protectPgp = async (req, res, next) => {
+  try {
+  } catch (error) {}
+};
+
 const protectBank = async (req, res, next) => {
-  const sig = req.headers.sig;
-  const ts = req.headers.ts;
-  if (req.headers.company_id !== process.env.RGP_ID) {
+  const { sig, ts, company_id } = req.headers;
+  if (company_id !== process.env.RGP_ID || company_id !== process.env.PGP_ID) {
     return res.status(401).json({ err: 'Wrong input identify' });
   }
   if (Date.now() - ts > 600000) {
     return res.status(401).json({ err: 'Time expire' });
   }
-  let checkSig = md5(req.body + ts + process.env.RGP_SECRET_KEY);
+  let checkSig;
+  if (company_id == process.env.RGP_ID)
+    checkSig = md5(req.body + ts + process.env.RGP_SECRET_KEY);
+  else checkSig = md5(req.body + ts + process.env.PGP_SECRET_KEY);
   if (checkSig !== sig) {
     return res.status(401).json({ err: 'Wrong sig' });
   }

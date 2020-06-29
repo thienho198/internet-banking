@@ -3,10 +3,12 @@ const md5 = require('md5');
 const jwt = require('jsonwebtoken');
 const PaymentAccount = require('../models/paymentAccount');
 const Customer = require('../models/customer');
+const History = require('../models/history');
 const customerController = require('./customerController');
 const openpgp = require('openpgp');
 const constant = require('../config/env');
 const crypto = require('crypto');
+const { signpgp, sendRequestPgp, verifyRgp } = require('../utils/bankFunction');
 
 exports.getRgpBank = async (req, res, next) => {
   try {
@@ -21,30 +23,73 @@ exports.getRgpBank = async (req, res, next) => {
   }
 };
 
-exports.rgpAddMoneyByStk = async (req, res, next) => {
-  const { stk, amountOfMoney } = req.body.data;
+exports.outerBankAddMoneyByStk = async (req, res, next) => {
+  const {
+    accountRequest,
+    nameRequest,
+    message,
+    stk,
+    amountOfMoney,
+  } = req.body.data;
+  let cleartext;
+  if (!accountRequest || !nameRequest || !stk || !amountOfMoney) {
+    let obj = { success: false, err: 'Please request with valid data' };
+    cleartext = await signpgp(obj);
+    res.status(400).json(cleartext);
+  }
+  const { company_id } = req.headers;
   try {
     const paymentAccount = await PaymentAccount.findOne({ stk: stk });
-    console.log(paymentAccount);
     paymentAccount.balance = paymentAccount.balance + amountOfMoney;
-    console.log(paymentAccount.balance);
     await paymentAccount.save();
     const customer = await Customer.findOne({
       paymentAccountId: paymentAccount._id,
     });
+    let transferAccount = await PaymentAccount.findOne({ stk: stk });
+    if (company_id == process.env.RGP_ID) {
+      await History.create({
+        operator: 'Customer',
+        accountSender: accountReq,
+        sender: nameReq,
+        accountReceive: stk,
+        receiver: transferAccount.name,
+        message,
+        amountOfMoney,
+        category: 'InternetBank',
+        bankSender: 'RGPBANK',
+      });
+    }
+    if (company_id == process.env.PGP_ID) {
+      await History.create({
+        operator: 'Customer',
+        accountSender: accountReq,
+        sender: nameReq,
+        accountReceive: stk,
+        receiver: transferAccount.name,
+        message,
+        amountOfMoney,
+        category: 'InternetBank',
+        bankSender: 'PGPBANK',
+      });
+    }
     let obj = { success: true, username: customer.name };
-    const cleartext = await signpgp(obj);
+    cleartext = await signpgp(obj);
     res.status(202).json({ cleartext });
   } catch (err) {
     let obj = { success: false };
     console.log(err);
-    const cleartext = await signpgp(obj);
+    cleartext = await signpgp(obj);
     res.status(400).json({ cleartext });
   }
 };
 
 exports.bankTransferPgp = async (req, res, next) => {
   const { des_username, value, message, otpcode } = req.body.data;
+  if ((!des_username, !value, !otpcode)) {
+    res
+      .status(400)
+      .json({ success: false, err: 'Please request with valid data' });
+  }
   const bank_company_id = process.env.HEADER_COMPANYID;
   const accessToken = req.headers['x-access-token'];
   jwt.verify(
@@ -86,49 +131,58 @@ exports.bankTransferPgp = async (req, res, next) => {
         const responseData = await sendRequestPgp({ cleartext }, link);
         const re = responseData.data;
         const data = JSON.stringify(re.data);
-        const verify = crypto.createVerify('SHA256');
-        verify.write(data);
-        verify.end();
-        let check = verify.verify(constant.RGP_PUBLICKEY, re.signature, 'hex');
-        if (check === true) res.json({ success: true, re });
-        res.json({ success: false, err: 'Wrong verify' });
+        // const verify = crypto.createVerify('SHA256');
+        // verify.write(data);
+        // verify.end();
+        // let check = verify.verify(constant.RGP_PUBLICKEY, re.signature, 'hex');
+        let check = await verifyRgp(data, constant.RGP_PUBLICKEY, re.signature);
+        if (check === true) {
+          userAccount.balance = userAccount.balance - allFee;
+          customer.OTP = undefined;
+          await History.create({
+            operator: 'Customer',
+            accountSender: userAccount.stk,
+            sender: userAccount.name,
+            accountReceive: des_username,
+            message,
+            amountOfMoney: value,
+            category: 'InternetBank',
+            bankReceiver: 'PGPBANK',
+          });
+          await userAccount.save();
+          await customer.save();
+          res.status(200).json({ success: true, re });
+        }
+        res.status(400).json({ success: false, err: 'Wrong verify' });
       } catch (err) {
-        res.json({ success: false, err });
+        res.status(400).json({ success: false, err });
       }
-
-      // transferAccount.balance = transferAccount.balance + amountOfMoney;
-      // userAccount.balance = userAccount.balance - allFee;
-      // customer.OTP = undefined;
-      // await customer.save();
-      // await userAccount.save();
-      // await transferAccount.save();
-      // return res.json({ userAccount, transferAccount, message });
     }
   );
 };
 
-const signpgp = async (obj) => {
-  const {
-    keys: [privateKey],
-  } = await openpgp.key.readArmored(constant.BANK_PRIVATE_KEY);
-  await privateKey.decrypt(constant.PASSPHRASE);
-  let object = JSON.stringify(obj);
-  const { data: cleartext } = await openpgp.sign({
-    message: openpgp.cleartext.fromText(object), // CleartextMessage or Message object
-    privateKeys: [privateKey], // for signing
-  });
-  return cleartext;
-};
+// const signpgp = async (obj) => {
+//   const {
+//     keys: [privateKey],
+//   } = await openpgp.key.readArmored(constant.BANK_PRIVATE_KEY);
+//   await privateKey.decrypt(constant.PASSPHRASE);
+//   let object = JSON.stringify(obj);
+//   const { data: cleartext } = await openpgp.sign({
+//     message: openpgp.cleartext.fromText(object), // CleartextMessage or Message object
+//     privateKeys: [privateKey], // for signing
+//   });
+//   return cleartext;
+// };
 
-const sendRequestPgp = async (body, link) => {
-  let timestamp = Date.now();
-  let sig = md5(timestamp + body + 'ThisKeyForHash');
-  const request = await axios.post(link, body, {
-    headers: {
-      company_id: 'pawGDX1Ddu',
-      timestamp: timestamp,
-      'x-signature': sig,
-    },
-  });
-  return request;
-};
+// const sendRequestPgp = async (body, link) => {
+//   let timestamp = Date.now();
+//   let sig = md5(timestamp + body + 'ThisKeyForHash');
+//   const request = await axios.post(link, body, {
+//     headers: {
+//       company_id: 'pawGDX1Ddu',
+//       timestamp: timestamp,
+//       'x-signature': sig,
+//     },
+//   });
+//   return request;
+// };
