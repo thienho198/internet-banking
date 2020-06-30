@@ -47,7 +47,23 @@ exports.protectBank = async (req, res, next) => {
   if (!req.headers.company_id) {
     return res.status(401).json({ err: 'You dont allow to access' });
   } else {
-    protectBank(req, res, next);
+    const { sig, ts, company_id } = req.headers;
+    if (
+      company_id !== process.env.RGP_ID ||
+      company_id !== process.env.PGP_ID
+    ) {
+      return res.status(401).json({ err: 'Wrong input identify' });
+    }
+    if (Date.now() - ts > 600000) {
+      return res.status(401).json({ err: 'Time expire' });
+    }
+    let checkSig;
+    if (company_id == process.env.RGP_ID)
+      checkSig = md5(req.body + ts + process.env.RGP_SECRET_KEY);
+    else checkSig = md5(req.body + ts + process.env.PGP_SECRET_KEY);
+    if (checkSig !== sig) {
+      return res.status(401).json({ err: 'Wrong sig' });
+    }
     next();
   }
 };
@@ -73,27 +89,5 @@ exports.protectRgp = async (req, res, next) => {
   } catch (error) {
     console.log(error);
     return res.status(400).json({ err: error });
-  }
-};
-
-exports.protectPgp = async (req, res, next) => {
-  try {
-  } catch (error) {}
-};
-
-const protectBank = async (req, res, next) => {
-  const { sig, ts, company_id } = req.headers;
-  if (company_id !== process.env.RGP_ID || company_id !== process.env.PGP_ID) {
-    return res.status(401).json({ err: 'Wrong input identify' });
-  }
-  if (Date.now() - ts > 600000) {
-    return res.status(401).json({ err: 'Time expire' });
-  }
-  let checkSig;
-  if (company_id == process.env.RGP_ID)
-    checkSig = md5(req.body + ts + process.env.RGP_SECRET_KEY);
-  else checkSig = md5(req.body + ts + process.env.PGP_SECRET_KEY);
-  if (checkSig !== sig) {
-    return res.status(401).json({ err: 'Wrong sig' });
   }
 };

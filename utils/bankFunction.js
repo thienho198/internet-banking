@@ -1,6 +1,9 @@
 const openpgp = require('openpgp');
 const crypto = require('crypto');
 const constant = require('../config/env');
+const moment = require('moment');
+const cryptoJS = require('crypto-js');
+const axios = require('axios');
 const signpgp = async (obj) => {
   const {
     keys: [privateKey],
@@ -15,11 +18,28 @@ const signpgp = async (obj) => {
 };
 
 const sendRequestPgp = async (body, link) => {
-  let timestamp = Date.now();
-  let sig = md5(timestamp + body + 'ThisKeyForHash');
-  const request = await axios.post(link, body, {
+  let ts = moment().unix();
+  let sign = cryptoJS.HmacSHA256(
+    ts + JSON.stringify(body),
+    process.env.SECRET_KEY
+  );
+  let request = await axios.post(link, body, {
     headers: {
-      company_id: 'pawGDX1Ddu',
+      'partner-code': 2,
+      ts,
+      sign,
+    },
+  });
+  console.log(request);
+  return request;
+};
+
+const sendRequestRgp = async (body, link) => {
+  let ts = Date.now();
+  let sig = md5(timestamp + body + process.env.SECRET_KEY);
+  let request = await axios.post(link, body, {
+    headers: {
+      company_id: process.env.HEADER_COMPANYID,
       timestamp: timestamp,
       'x-signature': sig,
     },
@@ -46,6 +66,7 @@ const verifyPgp = async (cleartext, publicKeyArmored) => {
 
 module.exports = {
   signpgp,
-  sendRequestPgp,
+  sendRequestRgp,
   verifyRgp,
+  sendRequestPgp,
 };

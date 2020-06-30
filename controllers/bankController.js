@@ -8,18 +8,35 @@ const customerController = require('./customerController');
 const openpgp = require('openpgp');
 const constant = require('../config/env');
 const crypto = require('crypto');
-const { signpgp, sendRequestPgp, verifyRgp } = require('../utils/bankFunction');
+const {
+  signpgp,
+  sendRequestRgp,
+  verifyRgp,
+  sendRequestPgp,
+} = require('../utils/bankFunction');
 
 exports.getRgpBank = async (req, res, next) => {
   try {
     console.log(req.body);
     const link =
       'https://salty-meadow-17297.herokuapp.com/customer/query_information';
-    const response = await sendRequestPgp(req.body, link);
+    const response = await sendRequestRgp(req.body, link);
     res.json({ success: true, data: response.data.data });
   } catch (error) {
     res.json({ success: false });
     console.error(error);
+  }
+};
+
+exports.getPgpBank = async (req, res, next) => {
+  console.log(req.body);
+  try {
+    const link = 'https://wnc-api-banking.herokuapp.com/api/PGPBank/users';
+    const response = await sendRequestPgp(req.body, link);
+    res.json({ success: true, data: response.data.data });
+  } catch (error) {
+    res.json({ success: false });
+    //console.error(error);
   }
 };
 
@@ -128,7 +145,7 @@ exports.bankTransferPgp = async (req, res, next) => {
         console.log('clearTEXT ', cleartext);
         const link =
           'https://salty-meadow-17297.herokuapp.com/customer/recharge';
-        const responseData = await sendRequestPgp({ cleartext }, link);
+        const responseData = await sendRequestRgp({ cleartext }, link);
         const re = responseData.data;
         const data = JSON.stringify(re.data);
         // const verify = crypto.createVerify('SHA256');
