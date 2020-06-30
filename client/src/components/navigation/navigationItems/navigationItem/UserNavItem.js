@@ -2,6 +2,7 @@ import React from 'react';
 import { Menu, Dropdown } from 'antd';
 import { DownOutlined } from '@ant-design/icons';
 import { connect } from 'react-redux';
+import { withRouter } from 'react-router-dom';
 
 import * as authActions from '../../../../store/actions/auth';
 import classes from './NavigationItem.module.css';
@@ -12,6 +13,7 @@ const UserNavItem = (props) => {
 	const onMenuClicked = ({ key }) => {
 		if (key === '0') {
 			props.logout();
+			props.history.push('/');
 			toastSuccess('Đăng xuất thành công');
 		}
 	};
@@ -42,4 +44,4 @@ const mapDispatchToProps = (dispatch) => {
 		logout: () => dispatch(authActions.authLogout())
 	};
 };
-export default connect(null, mapDispatchToProps)(UserNavItem);
+export default connect(null, mapDispatchToProps)(withRouter(UserNavItem));
