@@ -13,13 +13,18 @@ exports.getCustomerByPaymentAccount = async (req, res, next) => {
     paymentAccountId: paymentAccount._id,
   }).select({
     name: 1,
+    email: 1,
   });
   if (!customer) {
     res.status(404).json({ success: false, mes: 'customer not found' });
   }
   res
     .status(200)
-    .json({ success: true, data: { name: customer.name }, msg: 'found' });
+    .json({
+      success: true,
+      data: { name: customer.name, email: customer.email },
+      msg: 'found',
+    });
 };
 
 exports.getAll = async (req, res, next) => {
