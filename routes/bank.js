@@ -20,7 +20,7 @@ router.post(
 router.post('/bank/bankTransferPgp', protect, bankController.bankTransferPgp);
 
 router.post(
-  '/bank/rgpGetCustomer',
+  '/bank/getCustomer',
   protectBank,
   paymentController.getCustomerByPaymentAccount
 );
