@@ -24,19 +24,22 @@ exports.getRgpBank = async (req, res, next) => {
     res.json({ success: true, data: response.data.data });
   } catch (error) {
     res.json({ success: false });
-    console.error(error);
+    //console.error(error);
   }
 };
 
 exports.getPgpBank = async (req, res, next) => {
-  console.log(req.body);
   try {
+    console.log(req.body);
     const link = 'https://wnc-api-banking.herokuapp.com/api/PGPBank/users';
     const response = await sendRequestPgp(req.body, link);
-    res.json({ success: true, data: response.data.data });
-  } catch (error) {
+    res.json({
+      success: true,
+      data: response.data[Object.keys(response.data)[0]],
+    });
+  } catch (err) {
     res.json({ success: false });
-    //console.error(error);
+    console.log(err);
   }
 };
 

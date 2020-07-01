@@ -19,18 +19,18 @@ const signpgp = async (obj) => {
 
 const sendRequestPgp = async (body, link) => {
   let ts = moment().unix();
-  let sign = cryptoJS.HmacSHA256(
-    ts + JSON.stringify(body),
-    process.env.SECRET_KEY
-  );
+  let sign = cryptoJS
+    .HmacSHA256(ts + JSON.stringify(body), process.env.SECRET_KEY)
+    .toString();
+  let partner_code = 2;
   let request = await axios.post(link, body, {
     headers: {
-      'partner-code': 2,
+      partner_code,
       ts,
       sign,
     },
   });
-  console.log(request);
+  console.log('request nè', request.data[Object.keys(request.data)[0]]);
   return request;
 };
 
