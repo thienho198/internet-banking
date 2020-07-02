@@ -61,7 +61,6 @@ exports.outerBankAddMoneyByStk = async (req, res, next) => {
   try {
     const paymentAccount = await PaymentAccount.findOne({ stk: stk });
     paymentAccount.balance = paymentAccount.balance + amountOfMoney;
-    await paymentAccount.save();
     const customer = await Customer.findOne({
       paymentAccountId: paymentAccount._id,
     });
@@ -69,8 +68,8 @@ exports.outerBankAddMoneyByStk = async (req, res, next) => {
     if (company_id == process.env.RGP_ID) {
       await History.create({
         operator: 'Customer',
-        accountSender: accountReq,
-        sender: nameReq,
+        accountSender: accountRequest,
+        sender: nameRequest,
         accountReceive: stk,
         receiver: transferAccount.name,
         message,
@@ -82,8 +81,8 @@ exports.outerBankAddMoneyByStk = async (req, res, next) => {
     if (company_id == process.env.PGP_ID) {
       await History.create({
         operator: 'Customer',
-        accountSender: accountReq,
-        sender: nameReq,
+        accountSender: accountRequest,
+        sender: nameRequest,
         accountReceive: stk,
         receiver: transferAccount.name,
         message,
@@ -92,6 +91,7 @@ exports.outerBankAddMoneyByStk = async (req, res, next) => {
         bankSender: 'PGPBANK',
       });
     }
+    await paymentAccount.save();
     let obj = { success: true, username: customer.name };
     cleartext = await signpgp(obj);
     res.status(202).json({ cleartext });

@@ -11,7 +11,7 @@ router.post('/bank/checkRgpCustomer', bankController.getRgpBank);
 router.post('/bank/checkPgpCustomer', bankController.getPgpBank);
 
 router.post(
-  '/bank/rgpTransferMoney',
+  '/bank/outerTransferMoney',
   protectBank,
   protectRgp,
   bankController.outerBankAddMoneyByStk
