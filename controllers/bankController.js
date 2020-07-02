@@ -44,6 +44,7 @@ exports.getPgpBank = async (req, res, next) => {
 };
 
 exports.outerBankAddMoneyByStk = async (req, res, next) => {
+  const { company_id } = req.headers;
   const {
     accountRequest,
     nameRequest,
@@ -51,13 +52,15 @@ exports.outerBankAddMoneyByStk = async (req, res, next) => {
     stk,
     amountOfMoney,
   } = req.body.data;
+  console.log(req.body.data);
+  console.log('money ne: ', amountOfMoney);
+  console.log('money', typeof amountOfMoney);
   let cleartext;
   if (!accountRequest || !nameRequest || !stk || !amountOfMoney) {
     let obj = { success: false, err: 'Please request with valid data' };
     cleartext = await signpgp(obj);
     res.status(400).json(cleartext);
   }
-  const { company_id } = req.headers;
   try {
     const paymentAccount = await PaymentAccount.findOne({ stk: stk });
     paymentAccount.balance = paymentAccount.balance + amountOfMoney;
@@ -65,7 +68,7 @@ exports.outerBankAddMoneyByStk = async (req, res, next) => {
       paymentAccountId: paymentAccount._id,
     });
     let transferAccount = await PaymentAccount.findOne({ stk: stk });
-    if (company_id == process.env.RGP_ID) {
+    if (company_id === process.env.RGP_ID) {
       await History.create({
         operator: 'Customer',
         accountSender: accountRequest,
@@ -78,7 +81,7 @@ exports.outerBankAddMoneyByStk = async (req, res, next) => {
         bankSender: 'RGPBANK',
       });
     }
-    if (company_id == process.env.PGP_ID) {
+    if (company_id === process.env.PGP_ID) {
       await History.create({
         operator: 'Customer',
         accountSender: accountRequest,
