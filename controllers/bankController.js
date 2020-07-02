@@ -22,9 +22,9 @@ exports.getRgpBank = async (req, res, next) => {
       'https://salty-meadow-17297.herokuapp.com/customer/query_information';
     const response = await sendRequestRgp(req.body, link);
     res.json({ success: true, data: response.data.data });
-  } catch (error) {
+  } catch (err) {
     res.json({ success: false });
-    //console.error(error);
+    console.log(err);
   }
 };
 
@@ -53,8 +53,6 @@ exports.outerBankAddMoneyByStk = async (req, res, next) => {
     amountOfMoney,
   } = req.body.data;
   console.log(req.body.data);
-  console.log('money ne: ', amountOfMoney);
-  console.log('money', typeof amountOfMoney);
   let cleartext;
   if (!accountRequest || !nameRequest || !stk || !amountOfMoney) {
     let obj = { success: false, err: 'Please request with valid data' };
@@ -106,7 +104,7 @@ exports.outerBankAddMoneyByStk = async (req, res, next) => {
   }
 };
 
-exports.bankTransferPgp = async (req, res, next) => {
+exports.bankTransferRgp = async (req, res, next) => {
   const { des_username, value, message, otpcode } = req.body.data;
   if ((!des_username, !value, !otpcode)) {
     res
@@ -154,11 +152,9 @@ exports.bankTransferPgp = async (req, res, next) => {
         const responseData = await sendRequestRgp({ cleartext }, link);
         const re = responseData.data;
         const data = JSON.stringify(re.data);
-        // const verify = crypto.createVerify('SHA256');
-        // verify.write(data);
-        // verify.end();
-        // let check = verify.verify(constant.RGP_PUBLICKEY, re.signature, 'hex');
         let check = await verifyRgp(data, constant.RGP_PUBLICKEY, re.signature);
+        console.log('redata', re.data);
+        console.log('rếu', re.data.username);
         if (check === true) {
           userAccount.balance = userAccount.balance - allFee;
           customer.OTP = undefined;
@@ -168,6 +164,7 @@ exports.bankTransferPgp = async (req, res, next) => {
             sender: userAccount.name,
             accountReceive: des_username,
             message,
+            receiver: re.data.username,
             amountOfMoney: value,
             category: 'InternetBank',
             bankReceiver: 'PGPBANK',
@@ -176,36 +173,9 @@ exports.bankTransferPgp = async (req, res, next) => {
           await customer.save();
           res.status(200).json({ success: true, re });
         }
-        res.status(400).json({ success: false, err: 'Wrong verify' });
       } catch (err) {
         res.status(400).json({ success: false, err });
       }
     }
   );
 };
-
-// const signpgp = async (obj) => {
-//   const {
-//     keys: [privateKey],
-//   } = await openpgp.key.readArmored(constant.BANK_PRIVATE_KEY);
-//   await privateKey.decrypt(constant.PASSPHRASE);
-//   let object = JSON.stringify(obj);
-//   const { data: cleartext } = await openpgp.sign({
-//     message: openpgp.cleartext.fromText(object), // CleartextMessage or Message object
-//     privateKeys: [privateKey], // for signing
-//   });
-//   return cleartext;
-// };
-
-// const sendRequestPgp = async (body, link) => {
-//   let timestamp = Date.now();
-//   let sig = md5(timestamp + body + 'ThisKeyForHash');
-//   const request = await axios.post(link, body, {
-//     headers: {
-//       company_id: 'pawGDX1Ddu',
-//       timestamp: timestamp,
-//       'x-signature': sig,
-//     },
-//   });
-//   return request;
-// };

@@ -4,6 +4,7 @@ const constant = require('../config/env');
 const moment = require('moment');
 const cryptoJS = require('crypto-js');
 const axios = require('axios');
+const md5 = require('md5');
 const signpgp = async (obj) => {
   const {
     keys: [privateKey],
@@ -35,7 +36,7 @@ const sendRequestPgp = async (body, link) => {
 };
 
 const sendRequestRgp = async (body, link) => {
-  let ts = Date.now();
+  let timestamp = Date.now();
   let sig = md5(timestamp + body + process.env.SECRET_KEY);
   let request = await axios.post(link, body, {
     headers: {

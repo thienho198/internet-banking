@@ -7,7 +7,7 @@ const { protect, protectBank, protectRgp } = require('../middleware/auth');
 
 const router = express.Router();
 
-router.post('/bank/checkRgpCustomer', bankController.getRgpBank);
+router.post('/bank/checkRgpCustomer', protect, bankController.getRgpBank);
 router.post('/bank/checkPgpCustomer', bankController.getPgpBank);
 
 router.post(
@@ -17,7 +17,7 @@ router.post(
   bankController.outerBankAddMoneyByStk
 );
 
-router.post('/bank/bankTransferPgp', protect, bankController.bankTransferPgp);
+router.post('/bank/bankTransferRgp', protect, bankController.bankTransferRgp);
 
 router.post(
   '/bank/getCustomer',
