@@ -90,13 +90,29 @@ exports.addMoneyByStk = async (req, res, next) => {
 };
 
 exports.getHistoryAccount = async (req, res, next) => {
-  const { stk } = req.body.toString();
+  const stk = req.body.stk.toString();
   try {
     const history = await History.find();
-    const historyAccount = history.filter(
-      (item) => item.accountSender === stk || item.accountReceive === stk
+    const historyTransfer = history.filter(
+      (item) => item.accountSender === stk
     );
-    res.status(200).json({ success: true, historyAccount });
+
+    const historyReceive = history.filter(
+      (item) => item.accountReceive === stk
+    );
+
+    const historyDeptPay = history.filter(
+      (item) =>
+        (item.accountSender === stk && item.category === 'DeptPay') ||
+        (item.accountReceive === stk && item.category === 'DeptPay')
+    );
+
+    res.status(200).json({
+      success: true,
+      historyTransfer,
+      historyReceive,
+      historyDeptPay,
+    });
   } catch (err) {
     console.log(err);
     res.status(400).json({ success: false, err });

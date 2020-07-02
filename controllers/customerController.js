@@ -442,6 +442,41 @@ exports.transferMoney = async (req, res, next) => {
     res.json({ success: false, err });
   }
 };
+
+exports.changePassword = async (req, res, next) => {
+  const accessToken = req.headers['x-access-token'];
+  const { oldPassword, newPassword } = req.body;
+  try {
+    jwt.verify(
+      accessToken,
+      process.env.JWT_SECRET,
+      { ignoreExpiration: true },
+      async function (err, payload) {
+        const { id } = payload;
+        const customer = await Customer.findById(id).select('+password');
+        if (!customer) {
+          return res
+            .status(400)
+            .json({ success: false, err: 'User not exists' });
+        }
+        const isMatch = await customer.mathPassword(oldPassword);
+        if (!isMatch) {
+          return res.status(400).json({
+            error: 'Invalid old password',
+            success: false,
+          });
+        }
+        customer.password = newPassword;
+        await customer.save();
+        res.status(200).json({ success: true });
+      }
+    );
+  } catch (err) {
+    console.log(err);
+    res.status(400).json({ success: false, err });
+  }
+};
+
 var generateOTP = rn.generator({
   min: 10000,
   max: 99999,

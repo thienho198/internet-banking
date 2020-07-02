@@ -30,7 +30,7 @@ const sendRequestPgp = async (body, link) => {
       sign,
     },
   });
-  console.log('request nè', request.data[Object.keys(request.data)[0]]);
+  console.log('request nè', request.data);
   return request;
 };
 

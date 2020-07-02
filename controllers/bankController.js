@@ -35,7 +35,7 @@ exports.getPgpBank = async (req, res, next) => {
     const response = await sendRequestPgp(req.body, link);
     res.json({
       success: true,
-      data: response.data[Object.keys(response.data)[0]],
+      data: response.data,
     });
   } catch (err) {
     res.json({ success: false });

@@ -74,10 +74,6 @@ exports.protectRgp = async (req, res, next) => {
     let signature = req.body.signature;
     console.log('data: ' + data);
     console.log('sig: ' + req.body.signature);
-    // const verify = crypto.createVerify('SHA256');
-    // verify.write(data);
-    // verify.end();
-    // let check = verify.verify(constant.RGP_PUBLICKEY, signature, 'hex');
     let check = await verifyRgp(data, constant.RGP_PUBLICKEY, signature);
     if (check) {
       next();
