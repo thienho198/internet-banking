@@ -5,6 +5,7 @@ import { DownOutlined } from '@ant-design/icons';
 import { withRouter } from 'react-router-dom';
 import { useHistory } from 'react-router-dom';
 import classes from './NavigationItem.module.css';
+import _ from 'lodash';
 
 const NavigationItem = (props) => {
 	//#region constructor
@@ -17,7 +18,8 @@ const NavigationItem = (props) => {
 		console.log(props);
 		// props.location.pathname = '';
 		// props.history.location.pathname = '';
-		history.push(url);
+		_.isFunction(url) ? url() : history.push(url);
+
 		// props.history.replace(url);
 	};
 

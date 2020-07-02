@@ -3,5 +3,9 @@ import { lazy } from 'react';
 import { all_rights } from '../../util/RightUtil';
 
 const History = lazy(() => import('./history/History'));
+const ListReceiver = lazy(() => import('./listReceiver/ListReceiver'));
 
-export default [ { id: '/history-customer', exact: true, component: History, rights: [ all_rights.CUSTOMER_ACCESS ] } ];
+export default [
+	{ id: '/history-customer', exact: true, component: History, rights: [ all_rights.CUSTOMER_ACCESS ] },
+	{ id: '/list-receiver', exact: true, component: ListReceiver, rights: [ all_rights.CUSTOMER_ACCESS ] }
+];
