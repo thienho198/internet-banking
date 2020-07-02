@@ -44,12 +44,13 @@ exports.verifyBanker = async (req, res, next) => {
 
 //Verify outter bank
 exports.protectBank = async (req, res, next) => {
-  if (!req.headers.company_id) {
+  const { sig, ts, company_id } = req.headers;
+  console.log(process.env.RGP_ID === company_id);
+  if (!company_id) {
     return res.status(401).json({ err: 'You dont allow to access' });
   } else {
-    const { sig, ts, company_id } = req.headers;
     if (
-      company_id !== process.env.RGP_ID ||
+      company_id !== process.env.RGP_ID &&
       company_id !== process.env.PGP_ID
     ) {
       return res.status(401).json({ err: 'Wrong input identify' });
