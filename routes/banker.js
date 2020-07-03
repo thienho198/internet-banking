@@ -3,9 +3,14 @@ const express = require('express');
 const bankerController = require('../controllers/bankerController');
 
 const router = express.Router();
-const { verifyBanker } = require('../middleware/auth');
+const { verifyBanker, verifyAdmin } = require('../middleware/auth');
 
-router.post('/banker/create', verifyBanker, bankerController.create);
+router.post(
+  '/banker/create',
+  verifyBanker,
+  verifyAdmin,
+  bankerController.create
+);
 router.post(
   '/banker/addMoneyByEmail',
   verifyBanker,

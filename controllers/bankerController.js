@@ -19,22 +19,8 @@ exports.create = async (req, res, next) => {
       .json({ success: false, err: 'This email belong to one of customer' });
   }
   try {
-    jwt.verify(
-      accessToken,
-      process.env.JWT_SECRET,
-      { ignoreExpiration: true },
-      async function (err, payload) {
-        const { id } = payload;
-        const banker = await Banker.findById(id);
-        if (banker.role === 'employee')
-          return res
-            .status(401)
-            .json({ success: false, err: 'Employee not allow to access' });
-
-        await Banker.create({ name, email, role, password });
-        res.json({ success: true });
-      }
-    );
+    await Banker.create({ name, email, role, password });
+    res.json({ success: true });
   } catch (err) {
     console.log(err);
     if (err.errors.email) {
@@ -118,6 +104,8 @@ exports.getHistoryAccount = async (req, res, next) => {
     res.status(400).json({ success: false, err });
   }
 };
+
+exports.get;
 
 exports.getAllCustomer = async (req, res, next) => {
   try {

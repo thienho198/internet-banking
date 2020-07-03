@@ -3,7 +3,11 @@ const DeptReminder = require('../models/deptReminder');
 const PaymentAccount = require('../models/paymentAccount');
 
 exports.createDeptReminder = async (req, res, next) => {
-  const { stkRemind, stkWasRemined, amountOfMoney, content } = req.body;
+  const { stkWasRemined, amountOfMoney, content } = req.body;
+  const accountCustomer = await PaymentAccount.findById(
+    req.customer.paymentAccountId
+  );
+  const stkRemind = accountCustomer.stk;
   try {
     const deptReminder = new DeptReminder({
       amountOfMoney: amountOfMoney,

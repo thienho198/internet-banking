@@ -164,6 +164,26 @@ exports.createListRemind = async (req, res, next) => {
   }
 };
 
+exports.getListRemind = async (req, res, next) => {
+  const accessToken = req.headers['x-access-token'];
+  try {
+    jwt.verify(
+      accessToken,
+      process.env.JWT_SECRET,
+      { ignoreExpiration: true },
+      async function (err, payload) {
+        const { id } = payload;
+        const customer = await Customer.findById(id);
+        return res
+          .status(200)
+          .json({ listAccountRemind: customer.listAccountRemind });
+      }
+    );
+  } catch (err) {
+    res.status(400).json({ sucess: false, err });
+  }
+};
+
 exports.updateListRemind = async (req, res, next) => {
   const accessToken = req.headers['x-access-token'];
   let { stk, nameRemind, bank } = req.body;

@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken');
 const Customer = require('../models/customer');
-const Banker = require('../models/customer');
+const Banker = require('../models/banker');
 const PaymentAccount = require('../models/paymentAccount');
 const md5 = require('md5');
 const crypto = require('crypto');
@@ -36,10 +36,20 @@ exports.verifyBanker = async (req, res, next) => {
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     req.banker = await Banker.findById(decoded.id);
+    console.log(req.banker);
     next();
   } catch (err) {
     return res.status(401).json({ err: 'You have no right to access' });
   }
+};
+
+exports.verifyAdmin = async (req, res, next) => {
+  let token = req.headers['x-access-token'];
+  if (req.banker.role === 'employee')
+    return res
+      .status(401)
+      .json({ success: false, err: 'Employee not allow to access' });
+  next();
 };
 
 //Verify outter bank
