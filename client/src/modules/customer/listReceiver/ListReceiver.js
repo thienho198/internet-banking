@@ -1,5 +1,6 @@
 import React from 'react';
-import { Form, Input, Spin, Row, Col, Button, Select } from 'antd';
+import { Form, Input, Spin, Row, Col, Button, Select, Popconfirm, Tooltip, Modal } from 'antd';
+import { DeleteOutlined, EditOutlined } from '@ant-design/icons';
 
 import axios from '../../../axios/mainAxios';
 import classes from './listReceiver.module.css';
@@ -11,10 +12,97 @@ export default class ListReceiver extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-			isLoading: false
+			isLoading: true,
+			listAccountRemind: [],
+			modalVisible: false,
+			infoEdit: null
 		};
 	}
+	formRef = React.createRef();
+	//#region life cycle
+	componentDidMount() {
+		this.fetchData();
+	}
+	//#region functions
+	fetchData = () => {
+		this.setState({ isLoading: true });
+		axios.get('/customer/getListRemind').then((response) => {
+			console.log(response);
+			this.setState({ listAccountRemind: response.data.listAccountRemind, isLoading: false });
+		});
+	};
 	//#region render
+	renderItem = (item) => {
+		return (
+			<div
+				style={{
+					display: 'flex',
+					justifyContent: 'center',
+					paddingBottom: '10px',
+					borderBottom: '1px dashed #ddd',
+					alignItems: 'center',
+					paddingTop: '10px'
+				}}
+			>
+				<div style={{ display: 'inline-block', marginRight: '3px' }}>
+					<strong>Tên gợi nhớ:</strong>
+				</div>
+				<div style={{ display: 'inline-block' }}>{item.nameRemind}</div>
+				<div style={{ display: 'inline-block', marginLeft: '20px', marginRight: '3px' }}>
+					<strong>STK:</strong>
+				</div>
+				<div style={{ display: 'inline-block' }}>{item.stk}</div>
+				<div style={{ display: 'inline-block', marginLeft: '20px', marginRight: '3px' }}>
+					<strong>Bank:</strong>
+				</div>
+				<div style={{ display: 'inline-block', marginRight: '10px' }}>{item.bank}</div>
+				<Popconfirm
+					placement="topLeft"
+					title={'Bạn có chắc xóa tên gợi nhớ này không?'}
+					onConfirm={() => {
+						this.setState({ isLoading: true });
+						console.log(item.stk);
+						axios
+							.delete('/customer/deleteListRemind', { data: { stk: item.stk } })
+							.then((res) => {
+								this.fetchData();
+								toastSuccess('Xóa tên gợi nhớ thành công');
+							})
+							.catch((err) => {
+								this.setState({ isLoading: false });
+								console.log(err);
+								toastError('Lỗi hệ thống');
+							});
+					}}
+					okText="Có"
+					cancelText="Không"
+				>
+					<Tooltip title="Xóa">
+						<Button
+							size="small"
+							type="danger"
+							style={{ display: 'inline-block', borderRadius: '5px', marginRight: '10px' }}
+						>
+							<DeleteOutlined style={{ color: 'white' }} />
+						</Button>
+					</Tooltip>
+				</Popconfirm>
+				<Tooltip title="Sửa">
+					<Button
+						size="small"
+						type="primary"
+						style={{ display: 'inline-block', borderRadius: '5px', marginRight: '10px' }}
+						onClick={() => {
+							this.state.infoEdit && this.formRef.current.setFieldsValue(item);
+							this.setState({ modalVisible: true, infoEdit: item });
+						}}
+					>
+						<EditOutlined style={{ color: 'white' }} />
+					</Button>
+				</Tooltip>
+			</div>
+		);
+	};
 	render() {
 		return (
 			<div className={classes.container}>
@@ -28,6 +116,7 @@ export default class ListReceiver extends React.Component {
 								.post('/customer/createListRemind', values)
 								.then((response) => {
 									console.log(response);
+									this.fetchData();
 									toastSuccess('Thêm tên gợi nhớ thành công');
 								})
 								.catch((error) => {
@@ -99,8 +188,79 @@ export default class ListReceiver extends React.Component {
 							</Col>
 						</Row>
 					</Form>
+					<Modal
+						visible={this.state.modalVisible}
+						title="Sửa tên gợi nhớ"
+						// onOk={this.handleOk}
+						onCancel={() => {
+							this.setState({ modalVisible: false });
+						}}
+						footer={[
+							<Button
+								key="back"
+								onClick={() => {
+									this.setState({ modalVisible: false });
+								}}
+							>
+								Trở lại
+							</Button>,
+							<Button key="submit" type="primary" onClick={() => {}}>
+								Lưu
+							</Button>
+						]}
+					>
+						<Form ref={this.formRef} initialValues={this.state.infoEdit}>
+							<Form.Item
+								label="Tên gợi nhớ"
+								name="nameRemind"
+								wrapperCol={{ span: 14 }}
+								labelCol={{ span: 5 }}
+							>
+								<Input placeholder="Thầy web nc" />
+							</Form.Item>
+							<Form.Item
+								label="Số tài khoản"
+								name="stk"
+								rules={[
+									{
+										transform: (value) => Number(value),
+										type: 'number',
+										message: 'Không được chứa các kí tự khác ngoài số'
+									},
+									{
+										required: true,
+										message: 'Điền đầy đủ thông tin'
+									},
+									{
+										whitespace: true,
+										message: 'Không được chứa khoản trống'
+									}
+								]}
+								wrapperCol={{ span: 14 }}
+								labelCol={{ span: 5 }}
+							>
+								<Input placeholder="4356343256" />
+							</Form.Item>
+							<Form.Item
+								name="bank"
+								label="Ngân hàng:"
+								rules={[ { required: true } ]}
+								wrapperCol={{ span: 14 }}
+								labelCol={{ span: 5 }}
+							>
+								<Select placeholder="Chọn ngân hàng" allowClear>
+									<Option value="G16BANK">G16BANK</Option>
+									<Option value="PGPBANK">PGPBANK</Option>
+									<Option value="RGPBANK">RGPBANK</Option>
+								</Select>
+							</Form.Item>
+						</Form>
+					</Modal>
+					<div className={classes.title}>Danh sách gợi nhớ</div>
+					<div style={{ marginRight: '40px', marginTop: '20px' }}>
+						{this.state.listAccountRemind.map((item) => this.renderItem(item))}
+					</div>
 				</Spin>
-				<div className={classes.title}>Danh sách gợi nhớ</div>
 			</div>
 		);
 	}
