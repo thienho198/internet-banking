@@ -57,6 +57,8 @@ const verifyRgp = async (data, RGP_PUBLICKEY, signature) => {
 };
 
 const verifyPgp = async (cleartext, publicKeyArmored) => {
+  console.log('cleartext trong function', cleartext);
+  console.log('publicKeyArmored trong function', publicKeyArmored);
   const verified = await openpgp.verify({
     message: await openpgp.cleartext.readArmored(cleartext), // parse armored message
     publicKeys: (await openpgp.key.readArmored(publicKeyArmored)).keys, // for verification
@@ -70,4 +72,5 @@ module.exports = {
   sendRequestRgp,
   verifyRgp,
   sendRequestPgp,
+  verifyPgp,
 };

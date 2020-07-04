@@ -13,6 +13,7 @@ const {
   sendRequestRgp,
   verifyRgp,
   sendRequestPgp,
+  verifyPgp,
 } = require('../utils/bankFunction');
 
 exports.getRgpBank = async (req, res, next) => {
@@ -52,7 +53,6 @@ exports.outerBankAddMoneyByStk = async (req, res, next) => {
     stk,
     amountOfMoney,
   } = req.body.data;
-  console.log(req.body.data);
   let cleartext;
   if (!accountRequest || !nameRequest || !stk || !amountOfMoney) {
     let obj = { success: false, err: 'Please request with valid data' };
@@ -178,4 +178,75 @@ exports.bankTransferRgp = async (req, res, next) => {
       }
     }
   );
+};
+
+exports.bankTransferPgp = async (req, res, next) => {
+  const { accNumber, newBalance, message, otpcode } = req.body;
+  if ((!accNumber, !newBalance, !otpcode)) {
+    res
+      .status(400)
+      .json({ success: false, err: 'Please request with valid data' });
+  }
+  const bank_company_id = process.env.HEADER_COMPANYID;
+
+  const id = req.customer.id;
+  const customer = await Customer.findById(id);
+  if (!customer) {
+    return res.status(400).json({ success: false, err: 'User not exists' });
+  }
+  if (customer.OTP !== otpcode) {
+    return res.status(403).json({ success: false, err: 'Invalid OTP' });
+  }
+  const userAccount = await PaymentAccount.findById(customer.paymentAccountId);
+  const allFee = newBalance + parseInt(process.env.FEETRANSFER);
+  if (userAccount.balance < allFee)
+    return res
+      .status(406)
+      .json({ success: false, err: 'You dont have enough money' });
+  body = {
+    accNumber,
+    newBalance,
+    message,
+    senderNumber: userAccount.stk,
+    senderName: customer.name,
+  };
+  try {
+    let cleartextSend = await signpgp(body);
+    const link = 'https://wnc-api-banking.herokuapp.com/api/PGPTransfer';
+    const responseData = await sendRequestPgp(
+      { cleartext: cleartextSend },
+      link
+    );
+    let cleartext = responseData.data.cleartext;
+    let check = await verifyPgp(cleartext, constant.PGP_PUBLIC_KEY);
+    if (check === true) {
+      let dataObj = cleartext.slice(
+        cleartext.indexOf('{'),
+        cleartext.indexOf('}') + 1
+      );
+      let data = JSON.parse(dataObj);
+      if (data.success === false) {
+        res.status(400).json({ success: false });
+      }
+      userAccount.balance = userAccount.balance - allFee;
+      customer.OTP = undefined;
+      await History.create({
+        operator: 'Customer',
+        accountSender: userAccount.stk,
+        sender: userAccount.name,
+        accountReceive: accNumber,
+        message,
+        receiver: data.name,
+        amountOfMoney: newBalance,
+        category: 'InternetBank',
+        bankReceiver: 'PGPBANK',
+      });
+      await userAccount.save();
+      await customer.save();
+      res.status(200).json({ success: true });
+    }
+  } catch (err) {
+    console.log(err);
+    res.status(400).json({ success: false });
+  }
 };

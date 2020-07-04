@@ -7,7 +7,7 @@ const crypto = require('crypto');
 const openpgp = require('openpgp');
 const { response } = require('express');
 const constant = require('../config/env');
-const { verifyRgp } = require('../utils/bankFunction');
+const { verifyRgp, verifyPgp } = require('../utils/bankFunction');
 
 exports.protect = async (req, res, next) => {
   let token = req.headers['x-access-token'];
@@ -51,15 +51,6 @@ exports.verifyAdmin = async (req, res, next) => {
   next();
 };
 
-exports.verifyAdmin = async (req, res, next) => {
-  let token = req.headers['x-access-token'];
-  if (req.banker.role === 'employee')
-    return res
-      .status(401)
-      .json({ success: false, err: 'Employee not allow to access' });
-  next();
-};
-
 //Verify outter bank
 exports.protectBank = async (req, res, next) => {
   const { sig, ts, company_id } = req.headers;
@@ -95,6 +86,29 @@ exports.protectRgp = async (req, res, next) => {
     console.log('sig: ' + req.body.signature);
     let check = await verifyRgp(data, constant.RGP_PUBLICKEY, signature);
     if (check) {
+      next();
+    } else {
+      return res
+        .status(401)
+        .json({ err: 'Wrong verify. You have no right to access' });
+    }
+  } catch (error) {
+    console.log(error);
+    return res.status(400).json({ err: error });
+  }
+};
+
+exports.protectPgp = async (req, res, next) => {
+  try {
+    let cleartext = req.body.cleartext;
+    let check = await verifyPgp(cleartext, constant.PGP_PUBLIC_KEY);
+    if (check) {
+      let dataObj = cleartext.slice(
+        cleartext.indexOf('{'),
+        cleartext.indexOf('}') + 1
+      );
+      data = JSON.parse(dataObj);
+      req.body.data = data;
       next();
     } else {
       return res

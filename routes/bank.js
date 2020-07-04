@@ -3,7 +3,12 @@ const express = require('express');
 const bankController = require('../controllers/bankController');
 var paymentController = require('../controllers/paymentController');
 
-const { protect, protectBank, protectRgp } = require('../middleware/auth');
+const {
+  protect,
+  protectBank,
+  protectRgp,
+  protectPgp,
+} = require('../middleware/auth');
 
 const router = express.Router();
 
@@ -17,7 +22,15 @@ router.post(
   bankController.outerBankAddMoneyByStk
 );
 
+router.post(
+  '/bank/pgpTransferMoney',
+  protectBank,
+  protectPgp,
+  bankController.outerBankAddMoneyByStk
+);
+
 router.post('/bank/bankTransferRgp', protect, bankController.bankTransferRgp);
+router.post('/bank/bankTransferPgp', protect, bankController.bankTransferPgp);
 
 router.post(
   '/bank/getCustomer',
