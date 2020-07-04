@@ -41,7 +41,8 @@ const NavigationItems = (props) => {
 									toastSuccess('Đăng xuất thành công');
 								}
 							},
-							{ name: 'Thiết lập danh sách người nhận', url: '/list-receiver' }
+							{ name: 'Thiết lập danh sách người nhận', url: '/list-receiver' },
+							{ name: 'Đổi mật khẩu', url: '/change-passsword' }
 						]}
 					>
 						{props.authData.userName}

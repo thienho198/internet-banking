@@ -15,10 +15,12 @@ export default class ListReceiver extends React.Component {
 			isLoading: true,
 			listAccountRemind: [],
 			modalVisible: false,
-			infoEdit: null
+			infoEdit: null,
+			isFormEditLoading: false
 		};
 	}
 	formRef = React.createRef();
+
 	//#region life cycle
 	componentDidMount() {
 		this.fetchData();
@@ -188,74 +190,109 @@ export default class ListReceiver extends React.Component {
 							</Col>
 						</Row>
 					</Form>
+
 					<Modal
 						visible={this.state.modalVisible}
 						title="Sửa tên gợi nhớ"
 						// onOk={this.handleOk}
 						onCancel={() => {
-							this.setState({ modalVisible: false });
+							this.setState({ modalVisible: false, isFormEditLoading: false });
 						}}
 						footer={[
 							<Button
 								key="back"
 								onClick={() => {
-									this.setState({ modalVisible: false });
+									this.setState({ modalVisible: false, isFormEditLoading: false });
 								}}
 							>
 								Trở lại
 							</Button>,
-							<Button key="submit" type="primary" onClick={() => {}}>
+							<Button
+								key="submit"
+								type="primary"
+								loading={this.state.isFormEditLoading}
+								onClick={() => {
+									this.formRef.current
+										.validateFields()
+										.then((result) => {
+											this.setState({ isFormEditLoading: true });
+											console.log('fdsfsd', this.state.infoEdit);
+											axios
+												.put('/customer/updateListRemind', {
+													...result,
+													id: this.state.infoEdit._id
+												})
+												.then((response) => {
+													toastSuccess('Cập nhật thành công');
+													this.setState({ isFormEditLoading: false, modalVisible: false });
+													this.fetchData();
+												})
+												.catch((error) => {
+													toastError('Lỗi hệ thống');
+													this.setState({ isFormEditLoading: false });
+												});
+										})
+										.catch((err) => console.log(err));
+
+									// if (this.formRef.current.isFieldValidating('bank')) {
+
+									// }
+								}}
+							>
 								Lưu
 							</Button>
 						]}
 					>
-						<Form ref={this.formRef} initialValues={this.state.infoEdit}>
-							<Form.Item
-								label="Tên gợi nhớ"
-								name="nameRemind"
-								wrapperCol={{ span: 14 }}
-								labelCol={{ span: 5 }}
-							>
-								<Input placeholder="Thầy web nc" />
-							</Form.Item>
-							<Form.Item
-								label="Số tài khoản"
-								name="stk"
-								rules={[
-									{
-										transform: (value) => Number(value),
-										type: 'number',
-										message: 'Không được chứa các kí tự khác ngoài số'
-									},
-									{
-										required: true,
-										message: 'Điền đầy đủ thông tin'
-									},
-									{
-										whitespace: true,
-										message: 'Không được chứa khoản trống'
-									}
-								]}
-								wrapperCol={{ span: 14 }}
-								labelCol={{ span: 5 }}
-							>
-								<Input placeholder="4356343256" />
-							</Form.Item>
-							<Form.Item
-								name="bank"
-								label="Ngân hàng:"
-								rules={[ { required: true } ]}
-								wrapperCol={{ span: 14 }}
-								labelCol={{ span: 5 }}
-							>
-								<Select placeholder="Chọn ngân hàng" allowClear>
-									<Option value="G16BANK">G16BANK</Option>
-									<Option value="PGPBANK">PGPBANK</Option>
-									<Option value="RGPBANK">RGPBANK</Option>
-								</Select>
-							</Form.Item>
-						</Form>
+						<Spin spinning={this.state.isFormEditLoading}>
+							<Form ref={this.formRef} initialValues={this.state.infoEdit} name="editForm">
+								<Form.Item
+									label="Tên gợi nhớ"
+									name="nameRemind"
+									wrapperCol={{ span: 14 }}
+									labelCol={{ span: 5 }}
+								>
+									<Input placeholder="Thầy web nc" />
+								</Form.Item>
+								<Form.Item
+									label="Số tài khoản"
+									name="stk"
+									rules={[
+										{
+											transform: (value) => Number(value),
+											type: 'number',
+											message: 'Không được chứa các kí tự khác ngoài số'
+										},
+										{
+											required: true,
+											message: 'Điền đầy đủ thông tin'
+										},
+										{
+											whitespace: true,
+											message: 'Không được chứa khoản trống'
+										}
+									]}
+									wrapperCol={{ span: 14 }}
+									labelCol={{ span: 5 }}
+								>
+									<Input placeholder="4356343256" />
+								</Form.Item>
+								<Form.Item
+									name="bank"
+									label="Ngân hàng:"
+									rules={[ { required: true } ]}
+									wrapperCol={{ span: 14 }}
+									labelCol={{ span: 5 }}
+								>
+									<Select placeholder="Chọn ngân hàng" allowClear>
+										<Option value="G16BANK">G16BANK</Option>
+										<Option value="PGPBANK">PGPBANK</Option>
+										<Option value="RGPBANK">RGPBANK</Option>
+									</Select>
+								</Form.Item>
+							</Form>
+						</Spin>
 					</Modal>
+
 					<div className={classes.title}>Danh sách gợi nhớ</div>
 					<div style={{ marginRight: '40px', marginTop: '20px' }}>
 						{this.state.listAccountRemind.map((item) => this.renderItem(item))}
