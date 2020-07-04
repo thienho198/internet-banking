@@ -167,18 +167,10 @@ exports.createListRemind = async (req, res, next) => {
 exports.getListRemind = async (req, res, next) => {
   const accessToken = req.headers['x-access-token'];
   try {
-    jwt.verify(
-      accessToken,
-      process.env.JWT_SECRET,
-      { ignoreExpiration: true },
-      async function (err, payload) {
-        const { id } = payload;
-        const customer = await Customer.findById(id);
-        return res
-          .status(200)
-          .json({ listAccountRemind: customer.listAccountRemind });
-      }
-    );
+    const customer = req.customer;
+    return res
+      .status(200)
+      .json({ listAccountRemind: customer.listAccountRemind });
   } catch (err) {
     res.status(400).json({ sucess: false, err });
   }
@@ -186,37 +178,30 @@ exports.getListRemind = async (req, res, next) => {
 
 exports.updateListRemind = async (req, res, next) => {
   const accessToken = req.headers['x-access-token'];
-  let { stk, nameRemind, bank } = req.body;
+  let { id, stk, nameRemind, bank } = req.body;
   try {
-    jwt.verify(
-      accessToken,
-      process.env.JWT_SECRET,
-      { ignoreExpiration: true },
-      async function (err, payload) {
-        const { id } = payload;
-        const customer = await Customer.findById(id);
-        let check = false;
-        let updateListRemind = customer.listAccountRemind.map((item) => {
-          if (item.stk === stk.toString()) {
-            item.nameRemind = nameRemind;
-            item.bank = bank;
-            check = true;
-          }
-          return item;
-        });
-        if (check) {
-          customer.listAccountRemind = updateListRemind;
-          await customer.save();
-          return res
-            .status(200)
-            .json({ success: true, data: customer.listAccountRemind });
-        }
-        return res.status(400).json({
-          success: false,
-          err: 'Account not found in list',
-        });
+    const customer = req.customer;
+    let check = false;
+    let updateListRemind = customer.listAccountRemind.map((item) => {
+      if (item._id.toString() === id) {
+        item.nameRemind = nameRemind;
+        item.bank = bank;
+        item.stk = stk;
+        check = true;
       }
-    );
+      return item;
+    });
+    if (check) {
+      customer.listAccountRemind = updateListRemind;
+      await customer.save();
+      return res
+        .status(200)
+        .json({ success: true, data: customer.listAccountRemind });
+    }
+    return res.status(400).json({
+      success: false,
+      err: 'Account not found in list',
+    });
   } catch (err) {
     res.status(400).json({ success: false, err });
   }
