@@ -228,7 +228,7 @@ export default class ListReceiver extends React.Component {
 													this.fetchData();
 												})
 												.catch((error) => {
-													toastError('Lỗi hệ thống');
+													toastError('Tài khoản không tồn tại hoặc đã được thêm trước đó');
 													this.setState({ isFormEditLoading: false });
 												});
 										})

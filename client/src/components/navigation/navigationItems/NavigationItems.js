@@ -42,7 +42,7 @@ const NavigationItems = (props) => {
 								}
 							},
 							{ name: 'Thiết lập danh sách người nhận', url: '/list-receiver' },
-							{ name: 'Đổi mật khẩu', url: '/change-passsword' }
+							{ name: 'Đổi mật khẩu', url: '/change-password-customer' }
 						]}
 					>
 						{props.authData.userName}
