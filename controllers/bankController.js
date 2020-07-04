@@ -167,7 +167,7 @@ exports.bankTransferRgp = async (req, res, next) => {
             receiver: re.data.username,
             amountOfMoney: value,
             category: 'InternetBank',
-            bankReceiver: 'PGPBANK',
+            bankReceiver: 'RGPBANK',
           });
           await userAccount.save();
           await customer.save();

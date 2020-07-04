@@ -11,7 +11,6 @@ exports.create = async (req, res, next) => {
       .status(400)
       .json({ success: false, msg: 'Please add name, email and password' });
   }
-  const accessToken = req.headers['x-access-token'];
   const customer = await Customer.findOne({ email: email });
   if (customer) {
     return res
@@ -105,7 +104,42 @@ exports.getHistoryAccount = async (req, res, next) => {
   }
 };
 
-exports.get;
+exports.getHistoryOnlineExchange = async (req, res, next) => {
+  const history = await History.find();
+  const { begin, to, month, bank } = req.body;
+  const onlineHistory = history.filter((item) => {
+    if (begin && to && month) {
+      let d = new Date(item.createdAt);
+      let day = d.getDate();
+      if (
+        Number(begin) <= day &&
+        Number(to) >= day &&
+        Number(month) - 1 == d.getMonth() &&
+        item.category === 'InternetBank'
+      ) {
+        if (bank) {
+          if (bank === item.bankReceiver || bank === item.bankSender)
+            return item;
+        } else return item;
+      }
+    } else return item.category === 'InternetBank';
+  });
+  let totalExchange = onlineHistory.reduce((money, item) => {
+    let d = new Date(item.createdAt);
+    return (money += item.amountOfMoney);
+  }, 0);
+  let totalTransfer = onlineHistory.reduce((money, item) => {
+    if (item.bankSender === 'G16BANK') money += item.amountOfMoney;
+    return money;
+  }, 0);
+  let totalReceive = onlineHistory.reduce((money, item) => {
+    if (item.bankReceiver === 'G16BANK') money += item.amountOfMoney;
+    return money;
+  }, 0);
+  res
+    .status(200)
+    .json({ onlineHistory, totalExchange, totalReceive, totalTransfer });
+};
 
 exports.getAllCustomer = async (req, res, next) => {
   try {

@@ -29,7 +29,6 @@ exports.getListDeptReminderWasRemined = (req, res, next) => {
           return false;
         }
       );
-      //listDeptReminders = listDeptReminders.map(item=>item.deptReminderId._doc)
       res.json(listDeptReminders);
     })
     .catch((err) => console.log(err));
@@ -55,7 +54,6 @@ exports.getListDeptReminderRemind = (req, res, next) => {
           return false;
         }
       );
-      //listDeptReminders = listDeptReminders.map(item=>item.deptReminderId._doc)
       res.json(listDeptReminders);
     })
     .catch((err) => console.log(err));

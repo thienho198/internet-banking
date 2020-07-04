@@ -16,6 +16,14 @@ router.post(
   verifyBanker,
   bankerController.addMoneyByEmail
 );
+
+router.post(
+  '/banker/historyOnlineExchange',
+  verifyBanker,
+  verifyAdmin,
+  bankerController.getHistoryOnlineExchange
+);
+
 router.post(
   '/banker/getHistoryAccount',
   verifyBanker,

@@ -44,6 +44,14 @@ exports.verifyBanker = async (req, res, next) => {
 };
 
 exports.verifyAdmin = async (req, res, next) => {
+  if (req.banker.role === 'employee')
+    return res
+      .status(401)
+      .json({ success: false, err: 'Employee not allow to access' });
+  next();
+};
+
+exports.verifyAdmin = async (req, res, next) => {
   let token = req.headers['x-access-token'];
   if (req.banker.role === 'employee')
     return res
