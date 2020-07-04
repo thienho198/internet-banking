@@ -165,7 +165,6 @@ exports.createListRemind = async (req, res, next) => {
 };
 
 exports.getListRemind = async (req, res, next) => {
-  const accessToken = req.headers['x-access-token'];
   try {
     const customer = req.customer;
     return res
@@ -177,20 +176,33 @@ exports.getListRemind = async (req, res, next) => {
 };
 
 exports.updateListRemind = async (req, res, next) => {
-  const accessToken = req.headers['x-access-token'];
   let { id, stk, nameRemind, bank } = req.body;
+  if (!id)
+    return res.status(400).json({ success: false, err: 'Please enter id' });
   try {
     const customer = req.customer;
     let check = false;
+    let checkBank;
     let updateListRemind = customer.listAccountRemind.map((item) => {
       if (item._id.toString() === id) {
-        item.nameRemind = nameRemind;
-        item.bank = bank;
-        item.stk = stk;
+        if (nameRemind) item.nameRemind = nameRemind;
+        if (bank) item.bank = bank;
+        if (stk) item.stk = stk;
         check = true;
+        if (item.bank === 'G16BANK') checkBank = 'G16BANK';
       }
       return item;
     });
+    if (checkBank === 'G16BANK') {
+      const checkAccount = await PaymentAccount.findOne({
+        stk,
+      });
+      if (!checkAccount) {
+        check = false;
+        return res.status(400).json({ success: false, err: 'Invalid account' });
+      }
+    }
+
     if (check) {
       customer.listAccountRemind = updateListRemind;
       await customer.save();
@@ -203,6 +215,7 @@ exports.updateListRemind = async (req, res, next) => {
       err: 'Account not found in list',
     });
   } catch (err) {
+    console.log(err);
     res.status(400).json({ success: false, err });
   }
 };
