@@ -23,3 +23,29 @@
 	bottom: 20px;
 	right: 20px;
 }
+.buttonBack {
+	position: absolute;
+	bottom: 20px;
+	left: 20px;
+}
+.label {
+	width: 85px;
+	display: inline-block;
+}
+.finishedContainer {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+}
+.imageSuccess {
+	background-image: url('../../../asset/images/tick.png');
+	background-repeat: no-repeat;
+	background-size: contain;
+	width: 200px;
+	height: 200px;
+}
+.titleSuccess {
+	font-size: 23px;
+	font-weight: bold;
+}
