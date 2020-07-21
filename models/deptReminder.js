@@ -8,6 +8,10 @@ const deptReminderSchema = new Schema({
     type: Schema.Types.Number,
     require: true,
   },
+  nameReminded: {
+    type: Schema.Types.String,
+    require: true,
+  },
   content: {
     type: Schema.Types.String,
     require: true,
@@ -19,6 +23,10 @@ const deptReminderSchema = new Schema({
   stkWasRemined: {
     type: Schema.Types.String,
     required: true,
+  },
+  nameRemind: {
+    type: Schema.Types.String,
+    require: true,
   },
   status: {
     type: Schema.Types.String,

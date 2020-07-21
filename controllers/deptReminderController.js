@@ -7,13 +7,18 @@ exports.createDeptReminder = async (req, res, next) => {
   const accountCustomer = await PaymentAccount.findById(
     req.customer.paymentAccountId
   );
+  const accountWasReminded = await PaymentAccount.findOne({
+    stk: stkWasRemined,
+  });
   const stkRemind = accountCustomer.stk;
   try {
     const deptReminder = new DeptReminder({
       amountOfMoney: amountOfMoney,
       stkWasRemined: stkWasRemined,
+      nameReminded: accountWasReminded.name,
       content: content,
       stkRemind: stkRemind,
+      nameRemind: req.customer.name,
     });
     const deptReminderMG = await deptReminder.save();
 

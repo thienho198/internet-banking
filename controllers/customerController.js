@@ -9,7 +9,7 @@ const rn = require('random-number');
 const jwt = require('jsonwebtoken');
 
 exports.getListDeptReminderWasRemined = (req, res, next) => {
-  const customerId = req.query.id;
+  const customerId = req.customer;
   Customer.findById(customerId)
     .then((customer) => {
       return customer
@@ -17,7 +17,6 @@ exports.getListDeptReminderWasRemined = (req, res, next) => {
         .execPopulate();
     })
     .then((customer) => {
-      console.log('123', customer);
       const listDeptReminders = customer.listDeptReminders.filter(
         (reminder) => {
           if (
@@ -29,13 +28,15 @@ exports.getListDeptReminderWasRemined = (req, res, next) => {
           return false;
         }
       );
-      res.json(listDeptReminders);
+
+      listDeptReminders.nameRemind = PaymentAccount.name;
+      res.status(201).json(listDeptReminders);
     })
     .catch((err) => console.log(err));
 };
 
 exports.getListDeptReminderRemind = (req, res, next) => {
-  const customerId = req.query.id;
+  const customerId = req.customer;
   Customer.findById(customerId)
     .then((customer) => {
       return customer
@@ -43,7 +44,6 @@ exports.getListDeptReminderRemind = (req, res, next) => {
         .execPopulate();
     })
     .then((customer) => {
-      console.log('123', customer.listDeptReminders);
       const listDeptReminders = customer.listDeptReminders.filter(
         (reminder) => {
           if (
@@ -54,9 +54,9 @@ exports.getListDeptReminderRemind = (req, res, next) => {
           return false;
         }
       );
-      res.json(listDeptReminders);
+      res.status(201).json(listDeptReminders);
     })
-    .catch((err) => console.log(err));
+    .catch((err) => res.status(202).json({ err: 'No data available' }));
 };
 
 exports.deleteDeptReminder = async (req, res, next) => {
