@@ -39,7 +39,7 @@ class TransferInBank extends React.Component {
 			.then((response) => {
 				console.log(response);
 				let listAccountRemind = response.data.listAccountRemind;
-				listAccountRemind = listAccountRemind.filter((item) => item.bank === 'G16BANK');
+				// listAccountRemind = listAccountRemind.filter((item) => item.bank === 'G16BANK');
 				this.setState({ listAccountRemind: listAccountRemind, isFormEditLoading: false });
 			})
 			.catch((error) => {
@@ -63,14 +63,16 @@ class TransferInBank extends React.Component {
 					paddingTop: '10px'
 				}}
 			>
-				<div style={{ display: 'inline-block', marginRight: '3px' }}>
+				<div style={{ display: 'inline-block', marginRight: '3px', whiteSpace: 'nowrap' }}>
 					<strong>Tên gợi nhớ:</strong>
 				</div>
-				<div style={{ display: 'inline-block' }}>{item.nameRemind}</div>
-				<div style={{ display: 'inline-block', marginLeft: '20px', marginRight: '3px' }}>
+				<div style={{ display: 'inline-block', whiteSpace: 'nowrap' }}>{item.nameRemind}</div>
+				<div style={{ display: 'inline-block', marginLeft: '20px', marginRight: '3px', whiteSpace: 'nowrap' }}>
 					<strong>STK:</strong>
 				</div>
-				<div style={{ display: 'inline-block', marginRight: '20px' }}>{item.stk}</div>
+				<div style={{ display: 'inline-block', marginRight: '20px', whiteSpace: 'nowrap' }}>
+					{item.stk + ` (${item.bank})`}
+				</div>
 
 				<Tooltip title="Chọn">
 					<Button
@@ -384,6 +386,7 @@ class TransferInBank extends React.Component {
 										Trở lại
 									</Button>
 								]}
+								style={{ width: '700px' }}
 							>
 								<Spin spinning={this.state.isFormEditLoading}>
 									{this.state.listAccountRemind.map((item) => this.renderItem(item))}

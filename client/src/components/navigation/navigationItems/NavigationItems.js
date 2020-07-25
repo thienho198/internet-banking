@@ -19,15 +19,7 @@ const NavigationItems = (props) => {
 			{isAuthenticated ? access === 'customer' ? (
 				<React.Fragment>
 					<NavigationItem link="/history-customer">Lịch Sử Giao Dịch</NavigationItem>
-					<NavigationItem
-						isHaveDropdown
-						dropdownData={[
-							{ name: 'Chuyển khoản nội bộ', url: 'transfer-in-bank' },
-							{ name: 'Chuyển khoản liên ngân hàng', url: 'transfer-out-bank' }
-						]}
-					>
-						Chuyển khoản
-					</NavigationItem>
+					<NavigationItem link="/transfer">Chuyển khoản</NavigationItem>
 					{/* <NavigationItem link="/transfer-customer">Chuyển Khoản</NavigationItem> */}
 					<NavigationItem link="/remind">Quản Lý Nhắc Nợ</NavigationItem>
 					<NavigationItem
