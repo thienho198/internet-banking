@@ -33,7 +33,8 @@ class DeptRemind extends React.Component {
 			isFormEditLoading: false,
 			isFormMessageLoading: false,
 			modalTranferVisible: false,
-			isFormTranferLoading: false
+			isFormTranferLoading: false,
+			listAccountRemind: []
 		};
 	}
 	formRef = React.createRef();
@@ -43,14 +44,27 @@ class DeptRemind extends React.Component {
 		this.getData2();
 	}
 
+	getListAccountRemind() {
+		axios
+			.get('/customer/getListRemind')
+			.then((response) => {
+				this.setState({
+					listAccountRemind: response.data.listAccountRemind
+				});
+			})
+			.catch((err) => console.log(err));
+	}
+
 	getData1 = () => {
 		this.setState({ isLoading: true });
+		this.getListAccountRemind();
 		axios.get('/customer/getListDeptReminderRemind').then((response) => {
 			this.setState({
 				dataDeptReminder: response.data,
 				isLoading: false
 			});
-			console.log(this.state.dataDeptReminder);
+			console.log('data dept remind', this.state.dataDeptReminder);
+			console.log('data list acc remind', this.state.listAccountRemind);
 		});
 	};
 
@@ -88,6 +102,11 @@ class DeptRemind extends React.Component {
 		});
 	}
 
+	renderAccountRemind = (item) => ({
+		value: item.stk,
+		label: <div>{item.nameRemind}</div>
+	});
+
 	render() {
 		return (
 			<Spin spinning={this.state.isLoading}>
@@ -97,19 +116,21 @@ class DeptRemind extends React.Component {
 							<Content className={classes.container}>
 								<div className={classes.header}>
 									<Title level={3}>Danh sách người nợ</Title>
-									<Button
-										type="primary"
-										style={{ background: 'green' }}
-										onClick={() => {
-											this.setState({
-												modal2Visible: true,
-												infoRow: null
-											});
-										}}
-									>
-										<PlusSquareOutlined style={{ color: 'white' }} />
-										Tạo nhắc nợ
-									</Button>
+									<Tooltip title='Chỉ tạo nhắc nợ với khách hàng của ngân hàng'>
+										<Button
+											type="primary"
+											style={{ background: 'green' }}
+											onClick={() => {
+												this.setState({
+													modal2Visible: true,
+													infoRow: null
+												});
+											}}
+										>
+											<PlusSquareOutlined style={{ color: 'white' }} />
+											Tạo nhắc nợ
+										</Button>
+									</Tooltip>
 								</div>
 								<Table
 									dataSource={this.state.dataDeptReminder}
@@ -354,7 +375,11 @@ class DeptRemind extends React.Component {
 								wrapperCol={{ span: 14 }}
 								labelCol={{ span: 5 }}
 							>
-								<Input placeholder="4356343256" />
+								<AutoComplete
+									options={this.state.listAccountRemind.map((item) => this.renderAccountRemind(item))}
+								>
+									<Input placeholder="4356343256" />
+								</AutoComplete>
 							</Form.Item>
 							<Form.Item label="Nội dung" name="content" wrapperCol={{ span: 14 }} labelCol={{ span: 5 }}>
 								<Input placeholder="" />
@@ -418,10 +443,10 @@ class DeptRemind extends React.Component {
 											category: 'DeptPay'
 										};
 										console.log('data', dataTransfer);
-										console.log('data Transfer stk: ', typeof(dataTransfer.stk));
-										console.log('data Transfer amountmoney: ', typeof(dataTransfer.amountOfMoney));
-										console.log('data Transfer category: ', typeof(dataTransfer.category));
-										console.log('data Transfer OTP: ', typeof(dataTransfer.otpcode));
+										console.log('data Transfer stk: ', typeof dataTransfer.stk);
+										console.log('data Transfer amountmoney: ', typeof dataTransfer.amountOfMoney);
+										console.log('data Transfer category: ', typeof dataTransfer.category);
+										console.log('data Transfer OTP: ', typeof dataTransfer.otpcode);
 										axios
 											.post('/customer/transfer', dataTransfer)
 											.then((response) => {
