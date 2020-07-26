@@ -4,7 +4,7 @@ import * as actionTypes from '../actions/actionTypes';
 const initialState = {
 	accessToken: null,
 	loading: false,
-	access: 'customer'
+	access: ''
 };
 
 const reducer = (state = initialState, action) => {
