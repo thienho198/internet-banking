@@ -29,7 +29,7 @@ const NavigationItems = (props) => {
 						Chuyển khoản
 					</NavigationItem>
 					{/* <NavigationItem link="/transfer-customer">Chuyển Khoản</NavigationItem> */}
-					<NavigationItem link="/remind">Quản Lý Nhắc Nợ</NavigationItem>
+					<NavigationItem link="/dept-remind-management">Quản Lý Nhắc Nợ</NavigationItem>
 					<NavigationItem
 						isHaveDropdown
 						dropdownData={[
