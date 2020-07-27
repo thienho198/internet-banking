@@ -149,3 +149,31 @@ exports.getAllCustomer = async (req, res, next) => {
     res.status(400).json({ success: false, err });
   }
 };
+
+exports.getAllBanker = async (req, res, next) => {
+  try {
+    const banker = await Banker.find();
+    res.status(200).json({ success: true, data: banker });
+  } catch (err) {
+    res.status(400).json({ success: false, err });
+  }
+};
+
+exports.deleteBanker = async (req, res, next) => {
+  const { id } = req.body;
+  try {
+    const banker = await Banker.findById(id);
+    if (!banker)
+      return res
+        .status(400)
+        .json({ success: false, err: "Employee can't be found" });
+    if (banker.role === 'admin')
+      return res
+        .status(400)
+        .json({ success: false, err: 'Only allow to delete employee' });
+    await banker.remove();
+    res.status(200).json({ success: true });
+  } catch (error) {
+    return res.status(400).json({ success: false, err });
+  }
+};

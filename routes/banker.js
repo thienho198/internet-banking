@@ -35,4 +35,16 @@ router.get(
   verifyBanker,
   bankerController.getAllCustomer
 );
+router.get(
+  '/banker/getAllBanker',
+  verifyBanker,
+  verifyAdmin,
+  bankerController.getAllBanker
+);
+router.delete(
+  '/banker/deleteBanker',
+  verifyBanker,
+  verifyAdmin,
+  bankerController.deleteBanker
+);
 module.exports = router;
