@@ -1,36 +1,37 @@
 {
-	"name": "webnc-internetbanking",
-	"version": "1.0.0",
-	"description": "banking",
-	"main": "index.js",
-	"scripts": {
-		"test": "echo \"Error: no test specified\" && exit 1",
-		"server": "nodemon app.js",
-		"client": "npm run start --prefix client",
-		"dev": "concurrently \"npm run server\" \"npm run client\""
-	},
-	"author": "thienho-ngochien-baochau",
-	"license": "ISC",
-	"devDependencies": {
-		"nodemon": "^2.0.3"
-	},
-	"dependencies": {
-		"axios": "^0.19.2",
-		"bcryptjs": "^2.4.3",
-		"creditcard-generator": "0.0.7",
-		"crypto-js": "^4.0.0",
-		"dotenv": "^8.2.0",
-		"express": "^4.17.1",
-		"jsonwebtoken": "^8.5.1",
-		"md5": "^2.2.1",
-		"moment": "^2.27.0",
-		"mongodb": "^3.5.7",
-		"mongoose": "^5.9.13",
-		"mongoose-unique-validator": "^2.0.3",
-		"nodemailer": "^6.4.10",
-		"nodemailer-smtp-transport": "^2.7.4",
-		"openpgp": "^4.10.4",
-		"rand-token": "^1.0.1",
-		"random-number": "0.0.9"
-	}
+  "name": "webnc-internetbanking",
+  "version": "1.0.0",
+  "description": "banking",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "server": "nodemon app.js",
+    "client": "npm run start --prefix client",
+    "dev": "concurrently \"npm run server\" \"npm run client\""
+  },
+  "author": "thienho-ngochien-baochau",
+  "license": "ISC",
+  "devDependencies": {
+    "nodemon": "^2.0.3"
+  },
+  "dependencies": {
+    "axios": "^0.19.2",
+    "bcryptjs": "^2.4.3",
+    "creditcard-generator": "0.0.7",
+    "crypto-js": "^4.0.0",
+    "dotenv": "^8.2.0",
+    "express": "^4.17.1",
+    "jsonwebtoken": "^8.5.1",
+    "md5": "^2.2.1",
+    "moment": "^2.27.0",
+    "mongodb": "^3.5.7",
+    "mongoose": "^5.9.13",
+    "mongoose-unique-validator": "^2.0.3",
+    "nodemailer": "^6.4.10",
+    "nodemailer-handlebars": "^1.0.1",
+    "nodemailer-smtp-transport": "^2.7.4",
+    "openpgp": "^4.10.4",
+    "rand-token": "^1.0.1",
+    "random-number": "0.0.9"
+  }
 }

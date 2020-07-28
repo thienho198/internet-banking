@@ -71,7 +71,7 @@ router.post(
   customerController.changePassword
 );
 
-router.post('/customer/sendOTP', protect, customerController.sendOTP);
+router.get('/customer/sendOTP', protect, customerController.sendOTP);
 router.post('/customer/transfer', protect, customerController.transferMoney);
 
 module.exports = router;

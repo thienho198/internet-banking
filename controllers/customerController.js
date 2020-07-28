@@ -330,22 +330,20 @@ exports.postCreateCustomer = async (req, res, next) => {
 };
 
 exports.sendOTP = async (req, res, next) => {
-  const customer = await Customer.findOne({ email: req.body.email });
-  if (!customer) {
-    return res.status(401).json({ success: false, err: 'Invalid email!' });
-  }
-  let number = generateOTP();
-  customer.OTP = number;
-  const message = `Your OTP is: ${number}`;
+  const customer = req.customer;
+  let otp = generateOTP();
+  customer.OTP = otp;
   try {
     await sendEmail({
       email: customer.email,
       subject: 'OTP for transfer',
-      message,
+      otp,
+      name: customer.name,
     });
     await customer.save({ validateBeforeSave: false });
     res.status(200).json({ success: true, data: 'Email sent' });
   } catch (err) {
+    console.log(err);
     customer.OTP = undefined;
     await customer.save({ validateBeforeSave: false });
     res.status(500).json({ err: 'Email could not be sent' });
@@ -380,7 +378,7 @@ exports.transferMoney = async (req, res, next) => {
     await userAccount.save();
     await transferAccount.save();
     if (idDept) {
-      const deptRemind = DeptReminder.findById(idDept);
+      const deptRemind = await DeptReminder.findById(idDept);
       deptRemind.status = 'paid';
       await deptRemind.save();
     }
