@@ -380,7 +380,7 @@ exports.transferMoney = async (req, res, next) => {
     await userAccount.save();
     await transferAccount.save();
     if (idDept) {
-      const deptRemind = DeptReminder.findById(id);
+      const deptRemind = DeptReminder.findById(idDept);
       deptRemind.status = 'paid';
       await deptRemind.save();
     }
