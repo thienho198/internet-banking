@@ -353,7 +353,7 @@ exports.sendOTP = async (req, res, next) => {
 };
 
 exports.transferMoney = async (req, res, next) => {
-  const { stk, amountOfMoney, message, otpcode, category } = req.body;
+  const { stk, amountOfMoney, message, otpcode, category, idDept } = req.body;
   try {
     const customer = req.customer;
     if (!customer) {
@@ -375,9 +375,15 @@ exports.transferMoney = async (req, res, next) => {
     transferAccount.balance = transferAccount.balance + amountOfMoney;
     userAccount.balance = userAccount.balance - allFee;
     customer.OTP = undefined;
+
     await customer.save();
     await userAccount.save();
     await transferAccount.save();
+    if (idDept) {
+      const deptRemind = DeptReminder.findById(id);
+      deptRemind.status = 'paid';
+      await deptRemind.save();
+    }
     await History.create({
       operator: 'Customer',
       accountSender: userAccount.stk,

@@ -47,4 +47,10 @@ router.delete(
   verifyAdmin,
   bankerController.deleteBanker
 );
+router.delete(
+  '/banker/deleteCustomer',
+  verifyBanker,
+  verifyAdmin,
+  bankerController.deleteCustomer
+);
 module.exports = router;

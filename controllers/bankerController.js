@@ -177,3 +177,18 @@ exports.deleteBanker = async (req, res, next) => {
     return res.status(400).json({ success: false, err });
   }
 };
+
+exports.deleteCustomer = async (req, res, next) => {
+  const { id } = req.body;
+  try {
+    const customer = await Customer.findById(id);
+    if (!customer)
+      return res
+        .status(400)
+        .json({ success: false, err: "Employee can't be found" });
+    await banker.remove();
+    res.status(200).json({ success: true });
+  } catch (error) {
+    return res.status(400).json({ success: false, err });
+  }
+};
