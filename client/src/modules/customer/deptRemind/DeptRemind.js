@@ -48,8 +48,13 @@ class DeptRemind extends React.Component {
 		axios
 			.get('/customer/getListRemind')
 			.then((response) => {
+				let listData = [];
+				response.data.listAccountRemind.forEach(element => {
+					if(element.bank==='G16BANK')
+						listData.push(element);
+				});
 				this.setState({
-					listAccountRemind: response.data.listAccountRemind
+					listAccountRemind: listData
 				});
 			})
 			.catch((err) => console.log(err));
@@ -58,12 +63,13 @@ class DeptRemind extends React.Component {
 	getData1 = () => {
 		this.setState({ isLoading: true });
 		this.getListAccountRemind();
+		console.log('email', this.props.email );
 		axios.get('/customer/getListDeptReminderRemind').then((response) => {
 			this.setState({
 				dataDeptReminder: response.data,
 				isLoading: false
 			});
-			console.log('data dept remind', this.state.dataDeptReminder);
+			console.log('data debtor', this.state.dataDeptReminder);
 			console.log('data list acc remind', this.state.listAccountRemind);
 		});
 	};
@@ -71,11 +77,16 @@ class DeptRemind extends React.Component {
 	getData2 = () => {
 		this.setState({ isLoading: true });
 		axios.get('/customer/getListDeptReminderWasRemined').then((response) => {
-			// console.log(response.data);
+			let ListDataDeptReminderWasRemined = [];
+			response.data.forEach(element => {
+				if(element.deptReminderId.status==='unpaid')
+					ListDataDeptReminderWasRemined.push(element);
+			});
 			this.setState({
-				dataWasDeptReminder: response.data,
+				dataWasDeptReminder: ListDataDeptReminderWasRemined,
 				isLoading: false
 			});
+			console.log('data creditors', this.state.dataWasDeptReminder);
 		});
 	};
 
@@ -83,12 +94,11 @@ class DeptRemind extends React.Component {
 		axios
 			.post('/customer/sendOTP', { email: this.props.email })
 			.then((response) => {
-				this.setState({ currentStep: 2, formOneLoading: false });
+				console.log('đã gởi OTP');
 			})
 			.catch((err) => {
 				console.log(err);
 				toastError('Sai mã OTP');
-				this.setState({ formOneLoading: true });
 			});
 	}
 
@@ -144,6 +154,15 @@ class DeptRemind extends React.Component {
 											return row.deptReminderId.nameReminded
 												? row.deptReminderId.nameReminded
 												: row.deptReminderId.stkWasRemined;
+										}}
+										align="center"
+									/>
+									<Column
+										title="Tình trạng"
+										render={(row) => {
+											return row.deptReminderId.status=== 'unpaid'
+												? 'chưa thanh toán'
+												: 'đã thanh toán';
 										}}
 										align="center"
 									/>
@@ -440,13 +459,9 @@ class DeptRemind extends React.Component {
 											message: result.message,
 											stk: this.state.infoRow.deptReminderId.stkRemind,
 											amountOfMoney: this.state.infoRow.deptReminderId.amountOfMoney,
-											category: 'DeptPay'
+											category: 'DeptPay',
+											idDept: this.state.infoRow.deptReminderId._id
 										};
-										console.log('data', dataTransfer);
-										console.log('data Transfer stk: ', typeof dataTransfer.stk);
-										console.log('data Transfer amountmoney: ', typeof dataTransfer.amountOfMoney);
-										console.log('data Transfer category: ', typeof dataTransfer.category);
-										console.log('data Transfer OTP: ', typeof dataTransfer.otpcode);
 										axios
 											.post('/customer/transfer', dataTransfer)
 											.then((response) => {

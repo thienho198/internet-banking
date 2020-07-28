@@ -67,7 +67,7 @@ const NavigationItems = (props) => {
 			) : (
 				<React.Fragment>
 					<NavigationItem link="/manage-employee">Quản Lý Nhân Viên</NavigationItem>
-					<NavigationItem link="/transfer-admin">Giao dịch</NavigationItem>
+					<NavigationItem link="/history-exchange">Giao dịch</NavigationItem>
 					<UserNavItem authData={props.authData} />
 				</React.Fragment>
 			) : (

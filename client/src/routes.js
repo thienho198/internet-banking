@@ -3,6 +3,7 @@ import { lazy } from 'react';
 
 import EmployeeRouter from './modules/employee/employee_router';
 import CustomerRouter from './modules/customer/customer_router';
+import AdminRouter from './modules/admin/admin_route';
 const Login = lazy(() => import('./modules/login/Login'));
 const Home = lazy(() => import('./modules/home/Home'));
 const NotFound = lazy(() => import('./modules/notFound/NotFound'));
@@ -16,5 +17,6 @@ export default [
 	{ id: '/auth/resetpassword/:token', component: ResetPassword, rights: [], exact: true },
 	...CustomerRouter,
 	...EmployeeRouter,
+	...AdminRouter,
 	{ id: '*', component: NotFound, rights: [] }
 ];
