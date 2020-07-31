@@ -1,0 +1,15 @@
+.container{
+    margin: 10px 10%;
+}
+
+.header{
+    margin-top: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+}
+.dataShowSpace{
+    margin-top: 15px;
+    width: 400px;
+    margin: auto;
+}

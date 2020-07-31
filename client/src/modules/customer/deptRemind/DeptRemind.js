@@ -92,13 +92,13 @@ class DeptRemind extends React.Component {
 
 	sendOtpCode() {
 		axios
-			.post('/customer/sendOTP', { email: this.props.email })
+			.get('/customer/sendOTP')
 			.then((response) => {
 				console.log('đã gởi OTP');
 			})
 			.catch((err) => {
 				console.log(err);
-				toastError('Sai mã OTP');
+				toastError('Không gởi được OTP code');
 			});
 	}
 
@@ -257,6 +257,7 @@ class DeptRemind extends React.Component {
 													>
 														<DeleteOutlined />
 													</Button>
+													
 													<Button
 														type="primary"
 														style={{ background: '3EC1D3', color: 'white' }}
