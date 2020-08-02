@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Steps, Form, Input, Row, Col, Button, Modal, Spin, Tooltip } from 'antd';
+import { Steps, Form, Input, Row, Col, Button, Modal, Spin, Tooltip, Radio, Select } from 'antd';
 import {
 	ContactsOutlined,
 	ArrowRightOutlined,
@@ -15,6 +15,7 @@ import classes from './transferInBank.module.css';
 import { toastSuccess, toastError } from '../../../util/AppUtil';
 
 const { Step } = Steps;
+const { Option } = Select;
 
 class TransferInBank extends React.Component {
 	//#region constructor
@@ -27,8 +28,11 @@ class TransferInBank extends React.Component {
 			formOneLoading: false,
 			currentStep: 0,
 			otp: '',
-			isFinishedTransfer: false
+			isFinishedTransfer: false,
+			type: 'inBank'
 		};
+		this.dataPost = { type: 'inBank', bankName: 'PGP' };
+		this.bankName = 'PGP';
 	}
 
 	//#region side effect
@@ -39,7 +43,15 @@ class TransferInBank extends React.Component {
 			.then((response) => {
 				console.log(response);
 				let listAccountRemind = response.data.listAccountRemind;
-				listAccountRemind = listAccountRemind.filter((item) => item.bank === 'G16BANK');
+				if (this.state.type === 'inBank') {
+					listAccountRemind = listAccountRemind.filter((item) => item.bank === 'G16BANK');
+				} else {
+					if (this.bankName === 'PGP') {
+						listAccountRemind = listAccountRemind.filter((item) => item.bank === 'PGPBANK');
+					} else {
+						listAccountRemind = listAccountRemind.filter((item) => item.bank === 'RSABANK');
+					}
+				}
 				this.setState({ listAccountRemind: listAccountRemind, isFormEditLoading: false });
 			})
 			.catch((error) => {
@@ -67,8 +79,9 @@ class TransferInBank extends React.Component {
 					<strong>Tên gợi nhớ:</strong>
 				</div>
 				<div style={{ display: 'inline-block' }}>{item.nameRemind}</div>
-				<div style={{ display: 'inline-block', marginLeft: '20px', marginRight: '3px' }}>
+				<div style={{ display: 'inline-block', marginLeft: '20px', marginRight: '3px', whitespace: 'nowrap' }}>
 					<strong>STK:</strong>
+					{`(${item.bank})`}
 				</div>
 				<div style={{ display: 'inline-block', marginRight: '20px' }}>{item.stk}</div>
 
@@ -115,8 +128,51 @@ class TransferInBank extends React.Component {
 							{this.state.currentStep === 0 ? (
 								<React.Fragment>
 									<p className={classes.title}>Nhập Thông tin</p>
-									<Form ref={this.formRef} initialValues={this.dataPost}>
+									<Form
+										ref={this.formRef}
+										initialValues={this.dataPost}
+										onValuesChange={({ type, bankName }) => {
+											type && this.setState({ type: type });
+											if (bankName) {
+												this.bankName = bankName;
+											}
+										}}
+									>
 										<Spin spinning={this.state.formOneLoading}>
+											<Row>
+												<Col span={16}>
+													<Form.Item
+														label="Chuyển khoản"
+														wrapperCol={{ span: 18 }}
+														labelCol={{ span: 6 }}
+														name="type"
+													>
+														<Radio.Group value={this.state.type}>
+															<Radio.Button value="inBank">Trong ngân hàng</Radio.Button>
+															<Radio.Button value="outBank">Ngoài ngân hàng</Radio.Button>
+														</Radio.Group>
+													</Form.Item>
+												</Col>
+											</Row>
+											{this.state.type === 'outBank' && (
+												<Row>
+													<Col span={16}>
+														<Form.Item
+															name="bankName"
+															label="Ngân hàng"
+															rules={[ { required: true } ]}
+															wrapperCol={{ span: 18 }}
+															labelCol={{ span: 6 }}
+														>
+															<Select placeholder="Chọn ngân hàng" onChange={() => {}}>
+																<Option value="PGP">PGP Bank</Option>
+																<Option value="RSA">RSA Bank</Option>
+															</Select>
+														</Form.Item>
+													</Col>
+												</Row>
+											)}
+
 											<Row>
 												<Col span={16}>
 													<Form.Item
@@ -288,22 +344,98 @@ class TransferInBank extends React.Component {
 									onClick={() => {
 										this.formRef.current.validateFields().then((values) => {
 											this.setState({ formOneLoading: true });
-											axios
-												.post('/payment/getCustomer', values)
-												.then((response) => {
-													this.dataPost = { ...values, name: response.data.data.name };
-													this.setState({
-														formOneLoading: false,
-														dataPost: values,
-														currentStep: 1
+											console.log(values);
+
+											if (values.type === 'outBank') {
+												if (values.bankName === 'PGP') {
+													// values.accountID = Number(values.stk);
+													axios
+														.post('/bank/checkPgpCustomer', {
+															accountID: Number(values.stk)
+														})
+														.then((response) => {
+															if (response.data.success) {
+																if (response.data.data != '') {
+																	this.dataPost = {
+																		...values,
+																		name: response.data.data.clientName
+																	};
+																	this.setState({
+																		formOneLoading: false,
+																		dataPost: values,
+																		currentStep: 1
+																	});
+																} else {
+																	this.setState({
+																		formOneLoading: false
+																	});
+																	toastError('Số tài khoản không tồn tại');
+																}
+															} else {
+																this.setState({
+																	formOneLoading: false
+																});
+																toastError('Số tài khoản không tồn tại');
+															}
+															console.log(response);
+														})
+														.catch((error) => {
+															console.log(error);
+															this.setState({ formOneLoading: false });
+															toastError('Số tài khoản không tồn tại');
+														});
+												}
+												if (values.bankName === 'RSA') {
+													axios
+														.post('/bank/checkRgpCustomer', {
+															usernameID: Number(values.stk)
+														})
+														.then((response) => {
+															if (response.data.success) {
+																if (response.data.data != '') {
+																	this.dataPost = {
+																		...values,
+																		name: response.data.data.clientName
+																	};
+																	this.setState({
+																		formOneLoading: false,
+																		dataPost: values,
+																		currentStep: 1
+																	});
+																} else {
+																	this.setState({ formOneLoading: false });
+																	toastError('Số tài khoản không tồn tại');
+																}
+															} else {
+																this.setState({ formOneLoading: false });
+																toastError('Số tài khoản không tồn tại');
+															}
+															console.log(response);
+														})
+														.catch((error) => {
+															console.log(error);
+															this.setState({ formOneLoading: false });
+															toastError('Số tài khoản không tồn tại');
+														});
+												}
+											} else {
+												axios
+													.post('/payment/getCustomer', values)
+													.then((response) => {
+														this.dataPost = { ...values, name: response.data.data.name };
+														this.setState({
+															formOneLoading: false,
+															dataPost: values,
+															currentStep: 1
+														});
+														console.log(response);
+													})
+													.catch((error) => {
+														console.log(error);
+														this.setState({ formOneLoading: false });
+														toastError('Số tài khoản không tồn tại');
 													});
-													console.log(response);
-												})
-												.catch((error) => {
-													console.log(error);
-													this.setState({ formOneLoading: false });
-													toastError('Số tài khoản không tồn tại');
-												});
+											}
 										});
 									}}
 									className={classes.buttonNext}
@@ -319,13 +451,13 @@ class TransferInBank extends React.Component {
 									onClick={() => {
 										this.setState({ formOneLoading: true });
 										axios
-											.post('/customer/sendOTP', { email: this.props.email })
+											.get('/customer/sendOTP')
 											.then((response) => {
 												this.setState({ currentStep: 2, formOneLoading: false });
 											})
 											.catch((err) => {
 												console.log(err);
-												toastError('Sai mã OTP');
+												toastError('Lỗi hệ thống');
 												this.setState({ formOneLoading: true });
 											});
 										// this.setState({ currentStep: 2 });
@@ -341,23 +473,70 @@ class TransferInBank extends React.Component {
 							{this.state.currentStep === 2 ? (
 								<Button
 									onClick={() => {
-										this.dataPost.otpcode = Number(this.state.otp);
-										this.dataPost.amountOfMoney = Number(this.dataPost.amountOfMoney);
 										this.setState({ formOneLoading: true });
-										axios
-											.post('/customer/transfer', this.dataPost)
-											.then((response) => {
-												this.setState({
-													isFinishedTransfer: true,
-													formOneLoading: false
+
+										if (this.dataPost.type === 'outBank') {
+											if (this.dataPost.bankName === 'PGP') {
+												axios
+													.post('/bank/bankTransferPgp', {
+														accNumber: this.dataPost.stk,
+														newBalance: Number(this.dataPost.amountOfMoney),
+														message: this.dataPost.message,
+														otpcode: Number(this.state.otp)
+													})
+													.then((response) => {
+														this.setState({
+															isFinishedTransfer: true,
+															formOneLoading: false
+														});
+														toastSuccess('Chuyển khoản thành công');
+													})
+													.catch((err) => {
+														console.log(err);
+														toastError('Sai mã OTP');
+														this.setState({ formOneLoading: false });
+													});
+											}
+											if (this.dataPost.bankName === 'RSA') {
+												axios
+													.post('/bank/bankTransferRgp', {
+														des_username: Number(this.dataPost.stk),
+														value: Number(this.dataPost.amountOfMoney),
+														message: this.dataPost.message,
+														otpcode: Number(this.state.otp)
+													})
+													.then((response) => {
+														this.setState({
+															isFinishedTransfer: true,
+															formOneLoading: false
+														});
+														toastSuccess('Chuyển khoản thành công');
+													})
+													.catch((err) => {
+														console.log(err);
+														toastError('Sai mã OTP');
+														this.setState({ formOneLoading: false });
+													});
+											}
+										} else {
+											this.dataPost.otpcode = Number(this.state.otp);
+											this.dataPost.amountOfMoney = Number(this.dataPost.amountOfMoney);
+
+											axios
+												.post('/customer/transfer', this.dataPost)
+												.then((response) => {
+													this.setState({
+														isFinishedTransfer: true,
+														formOneLoading: false
+													});
+													toastSuccess('Chuyển khoản thành công');
+												})
+												.catch((err) => {
+													console.log(err);
+													toastError('Tài khoản không đủ hoặc sai mã OTP');
+													this.setState({ formOneLoading: false });
 												});
-												toastSuccess('Chuyển khoản thành công');
-											})
-											.catch((err) => {
-												console.log(err);
-												toastError('Lỗi hệ thống');
-												this.setState({ formOneLoading: false });
-											});
+										}
 									}}
 									className={classes.buttonNext}
 									type="primary"
