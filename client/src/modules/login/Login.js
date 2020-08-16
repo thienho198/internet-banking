@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { connect } from 'react-redux';
-import { Form, Input, Button, Checkbox, Spin } from 'antd';
+import { Form, Input, Button, Checkbox, Spin, notification } from 'antd';
 import { Link } from 'react-router-dom';
 import 'antd/dist/antd.css';
 
@@ -8,6 +8,7 @@ import axios from '../../axios/mainAxios';
 import classes from './Login.module.css';
 import loginImg from '../../asset/images/person.png';
 import * as authActions from '../../store/actions/auth';
+import ReCAPTCHA from 'react-google-recaptcha';
 
 const layout = {
 	labelCol: {
@@ -26,9 +27,17 @@ const tailLayout = {
 
 const Login = (props) => {
 	const onFinish = (values) => {
-		props.authLogin(values, props.history);
+		if (refC.current.getValue()) {
+			props.authLogin(values, props.history);
+		} else {
+			notification.error({
+				message: 'Captcha không chính xác',
+				description: 'Vui lòng nhập captcha',
+				placement: 'bottom'
+			});
+		}
 	};
-
+	const refC = useRef();
 	return (
 		<div className={classes.loginArea}>
 			<Spin spinning={props.authLoading}>
@@ -73,16 +82,28 @@ const Login = (props) => {
 						>
 							<Input.Password placeholder="Password" />
 						</Form.Item>
+						<div style={{ marginBottom: '10px', display: 'flex', alignItems: 'center' }}>
+							<ReCAPTCHA
+								ref={refC}
+								sitekey="6Le9kb8ZAAAAAOcNuNDPLrjHeGSJ9YeC1dE4vHmn"
+								onChange={(value) => {}}
+							/>
+							<Form.Item>
+								<Button
+									type="primary"
+									htmlType="submit"
+									style={{ marginLeft: '5px', marginTop: '10px' }}
+								>
+									Đăng nhập
+								</Button>
+							</Form.Item>
+						</div>
 
-						<Form.Item {...tailLayout}>
-							<Button type="primary" htmlType="submit">
-								Đăng nhập
-							</Button>
-						</Form.Item>
-						<div style={{ textAlign: 'right' }}>
+						<div style={{ textAlign: 'right', marginTop: '10px' }}>
 							<Link to="/forgot-password"> Quên mật khẩu </Link>
 						</div>
 					</Form>
+
 					{/* <Button
 						type="primary"
 						onClick={() => {
