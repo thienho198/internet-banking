@@ -18,13 +18,11 @@ exports.getCustomerByPaymentAccount = async (req, res, next) => {
   if (!customer) {
     res.status(404).json({ success: false, mes: 'customer not found' });
   }
-  res
-    .status(200)
-    .json({
-      success: true,
-      data: { name: customer.name, email: customer.email },
-      msg: 'found',
-    });
+  res.status(200).json({
+    success: true,
+    data: { name: customer.name, email: customer.email },
+    msg: 'found',
+  });
 };
 
 exports.getAll = async (req, res, next) => {
@@ -37,10 +35,11 @@ exports.getAll = async (req, res, next) => {
   }
 };
 
-exports.getAccount = async (req, res, next) => {
-  const account = await PaymentAccount.findById(req.params.id);
+exports.paymentAccount = async (req, res, next) => {
+  const customer = req.customer;
+  const account = await PaymentAccount.findById(customer.paymentAccountId);
   if (!account) {
     return res.status(404).json({ success: false });
   }
-  return res.status(200).json({ success: true, yourAccount: { account } });
+  return res.status(200).json({ success: true, account });
 };

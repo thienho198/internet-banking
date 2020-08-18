@@ -9,6 +9,10 @@ router.post(
   paymentController.getCustomerByPaymentAccount
 );
 router.get('/payment/allPayment', protect, paymentController.getAll);
-router.get('/payment/:id', protect, paymentController.getAccount);
+router.get(
+  '/payment/paymentAccount',
+  protect,
+  paymentController.paymentAccount
+);
 
 module.exports = router;
