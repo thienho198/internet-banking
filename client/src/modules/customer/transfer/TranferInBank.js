@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Steps, Form, Input, Row, Col, Button, Modal, Spin, Tooltip, Radio, Select } from 'antd';
+import { Steps, Form, Input, Row, Col, Button, Modal, Spin, Tooltip, Radio, Select, Checkbox } from 'antd';
 import {
 	ContactsOutlined,
 	ArrowRightOutlined,
@@ -59,6 +59,9 @@ class TransferInBank extends React.Component {
 				this.setState({ isFormEditLoading: false });
 				toastError('Lỗi hệ thống');
 			});
+	};
+	checkIfExistAcountInRemind = (stk) => {
+		return this.state.listAccountRemind.some((item) => item.stk == stk);
 	};
 	//#region events
 
@@ -304,6 +307,17 @@ class TransferInBank extends React.Component {
 											</span>
 											<span>{this.dataPost.message}</span>
 										</div>
+										<div style={{ marginTop: '20px' }}>
+											{this.checkIfExistAcountInRemind(this.dataPost.stk) ? null : (
+												<Checkbox
+													onChange={(e) => {
+														this.saveAccount = e.target.checked;
+													}}
+												>
+													Lưu tài khoản
+												</Checkbox>
+											)}
+										</div>
 									</React.Fragment>
 								</Spin>
 							) : null}
@@ -490,6 +504,16 @@ class TransferInBank extends React.Component {
 															formOneLoading: false
 														});
 														toastSuccess('Chuyển khoản thành công');
+														if (
+															!this.checkIfExistAcountInRemind(this.dataPost.stk) &&
+															this.saveAccount
+														) {
+															axios.post('/customer/createListRemind', {
+																stk: this.dataPost.stk,
+																nameRemind: this.dataPost.name,
+																bankName: 'PGPBANK'
+															});
+														}
 													})
 													.catch((err) => {
 														console.log(err);
@@ -511,6 +535,16 @@ class TransferInBank extends React.Component {
 															formOneLoading: false
 														});
 														toastSuccess('Chuyển khoản thành công');
+														if (
+															!this.checkIfExistAcountInRemind(this.dataPost.stk) &&
+															this.saveAccount
+														) {
+															axios.post('/customer/createListRemind', {
+																stk: this.dataPost.stk,
+																nameRemind: this.dataPost.name,
+																bankName: 'RGPBANK'
+															});
+														}
 													})
 													.catch((err) => {
 														console.log(err);
@@ -530,6 +564,17 @@ class TransferInBank extends React.Component {
 														formOneLoading: false
 													});
 													toastSuccess('Chuyển khoản thành công');
+													debugger;
+													if (
+														!this.checkIfExistAcountInRemind(this.dataPost.stk) &&
+														this.saveAccount
+													) {
+														axios.post('/customer/createListRemind', {
+															stk: this.dataPost.stk,
+															nameRemind: this.dataPost.name,
+															bankName: 'G16BANK'
+														});
+													}
 												})
 												.catch((err) => {
 													console.log(err);
