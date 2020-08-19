@@ -33,6 +33,9 @@ const NavigationItems = (props) => {
 					<NavigationItem
 						isHaveDropdown
 						dropdownData={[
+							{ name: 'Thiết lập danh sách người nhận', url: '/list-receiver' },
+							{ name: 'Đổi mật khẩu', url: '/change-password-customer' },
+							{ name: 'Tài khoản', url: '/account' },
 							{
 								name: 'Đăng xuất',
 								url: () => {
@@ -40,9 +43,7 @@ const NavigationItems = (props) => {
 									props.history.push('/');
 									toastSuccess('Đăng xuất thành công');
 								}
-							},
-							{ name: 'Thiết lập danh sách người nhận', url: '/list-receiver' },
-							{ name: 'Đổi mật khẩu', url: '/change-password-customer' }
+							}
 						]}
 					>
 						{props.authData.userName}
