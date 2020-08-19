@@ -11,7 +11,7 @@
 		"antd": "^4.3.4",
 		"axios": "^0.19.2",
 		"history": "^5.0.0",
-		"lodash": "^4.17.15",
+		"lodash": "^4.17.20",
 		"moment": "^2.27.0",
 		"react": "^16.13.1",
 		"react-dom": "^16.13.1",
@@ -19,7 +19,7 @@
 		"react-recaptcha": "^2.3.10",
 		"react-redux": "^7.2.0",
 		"react-router-dom": "^5.2.0",
-		"react-scripts": "3.4.1",
+		"react-scripts": "^3.4.3",
 		"redux": "^4.0.5",
 		"redux-thunk": "^2.3.0"
 	},
@@ -33,7 +33,15 @@
 		"extends": "react-app"
 	},
 	"browserslist": {
-		"production": [ ">0.2%", "not dead", "not op_mini all" ],
-		"development": [ "last 1 chrome version", "last 1 firefox version", "last 1 safari version" ]
+		"production": [
+			">0.2%",
+			"not dead",
+			"not op_mini all"
+		],
+		"development": [
+			"last 1 chrome version",
+			"last 1 firefox version",
+			"last 1 safari version"
+		]
 	}
 }

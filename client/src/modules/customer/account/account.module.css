@@ -1,0 +1,12 @@
+.container{
+    margin: 'auto';
+}
+.header{
+    margin: 0px 10%;
+    display: flex;
+    justify-content: space-between;
+}
+.title{
+    font-size: large;
+    font-weight: bold;
+}
