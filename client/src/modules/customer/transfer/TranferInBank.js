@@ -402,14 +402,16 @@ class TransferInBank extends React.Component {
 												if (values.bankName === 'RSA') {
 													axios
 														.post('/bank/checkRgpCustomer', {
-															usernameID: Number(values.stk)
+															data: {
+																usernameID: Number(values.stk)
+															}
 														})
 														.then((response) => {
 															if (response.data.success) {
 																if (response.data.data != '') {
 																	this.dataPost = {
 																		...values,
-																		name: response.data.data.clientName
+																		name: response.data.data.name
 																	};
 																	this.setState({
 																		formOneLoading: false,
