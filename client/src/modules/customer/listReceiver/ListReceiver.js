@@ -165,9 +165,7 @@ export default class ListReceiver extends React.Component {
 							if (values.bank === 'PGPBANK') {
 								axios
 									.post('/bank/checkPgpCustomer', {
-										data: {
-											usernameID: Number(values.stk)
-										}
+										accountID: Number(values.stk)
 									})
 									.then((res) => {
 										axios
