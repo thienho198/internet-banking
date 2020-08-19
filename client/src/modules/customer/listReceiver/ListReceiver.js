@@ -144,22 +144,23 @@ export default class ListReceiver extends React.Component {
 										}
 									})
 									.then((res) => {
-										axios
-											.post('/customer/createListRemind', values)
-											.then((response) => {
-												console.log(response);
-												this.fetchData();
-												toastSuccess('Thêm tên gợi nhớ thành công');
-											})
-											.catch((error) => {
-												console.log(error);
-												toastError(
-													'Số tài khoản đã tồn tại trong danh sách hoặc số tài khoản không đúng'
-												);
-											});
-									})
-									.catch((error) => {
-										toastError('Không tồn tại tài khoản này');
+										if (res.data.success) {
+											axios
+												.post('/customer/createListRemind', values)
+												.then((response) => {
+													console.log(response);
+													this.fetchData();
+													toastSuccess('Thêm tên gợi nhớ thành công');
+												})
+												.catch((error) => {
+													console.log(error);
+													toastError(
+														'Số tài khoản đã tồn tại trong danh sách hoặc số tài khoản không đúng'
+													);
+												});
+										} else {
+											toastError('Không tồn tại tài khoản này');
+										}
 									});
 							}
 							if (values.bank === 'PGPBANK') {
