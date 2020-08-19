@@ -84,11 +84,19 @@ export default class History extends React.Component {
 			<div className={classes.item_receive}>
 				<div className={classes.sub_wrap}>
 					<div className={classes.label}>Tài khoản gửi:</div>
-					<div className="content">{item.accountReceive}</div>
+					<div className="content">{item.accountSender}</div>
+				</div>
+				<div className={classes.sub_wrap}>
+					<div className={classes.label}>Tên người gửi:</div>
+					<div className="content">{item.sender}</div>
 				</div>
 				<div className={classes.sub_wrap}>
 					<div className={classes.label}>Tài khoản nhận:</div>
-					<div className="content">{item.accountSender}</div>
+					<div className="content">{item.accountReceive}</div>
+				</div>
+				<div className={classes.sub_wrap}>
+					<div className={classes.label}>Tên người nhận:</div>
+					<div className="content">{item.receiver}</div>
 				</div>
 				<div className={classes.sub_wrap}>
 					<div className={classes.label}>Ngày gửi:</div>

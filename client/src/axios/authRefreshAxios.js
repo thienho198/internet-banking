@@ -2,7 +2,7 @@ import axios from 'axios';
 
 import { store } from '../store/store';
 
-const instance = axios.create({ timeout: 100000 });
+const instance = axios.create({});
 
 instance.interceptors.request.use((config) => {
 	const state = store.getState();
