@@ -9,7 +9,7 @@ export default class Account extends React.Component {
 		super(props);
 		this.state = {
 			isLoading: false,
-			listAccount: []
+			listAccount: {}
 		};
 	}
 
@@ -24,7 +24,7 @@ export default class Account extends React.Component {
 			.then((res) => {
 				console.log('data receive', res.data);
 				this.setState({
-					listAccount: res.data,
+					listAccount: res.data.account,
 					isLoading: false
 				});
 				console.log('data trong show', this.state.listAccount.account.stk);
@@ -34,11 +34,11 @@ export default class Account extends React.Component {
 
 	render() {
 		return (
-			<div className={classes.container}>
+			<div className={classes.container} style={{ display: 'flex', justifyContent: 'center' }}>
 				<Spin spinning={this.state.isLoading} className={classes.header}>
-					<div className={classes.title}>Danh sách tài khoản của người dùng</div>
-                    <p>{this.state.listAccount.account.stk}</p>
-                    <p>{this.state.listAccount.account.balance}</p>
+					<div className={classes.title}>Thông tin tài khoản</div>
+					<div>Số tài khoản: {this.state.listAccount.stk}</div>
+					<div>Số dư: {this.state.listAccount.balance}</div>
 				</Spin>
 			</div>
 		);
