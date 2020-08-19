@@ -243,7 +243,7 @@ exports.bankTransferPgp = async (req, res, next) => {
       });
       await userAccount.save();
       await customer.save();
-      res.status(200).json({ success: true });
+      res.status(200).json({ success: true, name: data.name });
     }
   } catch (err) {
     console.log(err);
