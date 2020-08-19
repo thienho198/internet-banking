@@ -114,17 +114,80 @@ export default class ListReceiver extends React.Component {
 						wrapperCol={{ span: 6 }}
 						onFinish={(values) => {
 							console.log(values);
-							axios
-								.post('/customer/createListRemind', values)
-								.then((response) => {
-									console.log(response);
-									this.fetchData();
-									toastSuccess('Thêm tên gợi nhớ thành công');
-								})
-								.catch((error) => {
-									console.log(error);
-									toastError('Số tài khoản đã tồn tại trong danh sách hoặc số tài khoản không đúng');
-								});
+							if (values.bank === 'G16BANK') {
+								axios
+									.post('/payment/getCustomer', values)
+									.then((res) => {
+										axios
+											.post('/customer/createListRemind', values)
+											.then((response) => {
+												console.log(response);
+												this.fetchData();
+												toastSuccess('Thêm tên gợi nhớ thành công');
+											})
+											.catch((error) => {
+												console.log(error);
+												toastError(
+													'Số tài khoản đã tồn tại trong danh sách hoặc số tài khoản không đúng'
+												);
+											});
+									})
+									.catch((error) => {
+										toastError('Không tồn tại tài khoản này');
+									});
+							}
+							if (values.bank === 'RGPBANK') {
+								axios
+									.post('/bank/checkRgpCustomer', {
+										data: {
+											usernameID: Number(values.stk)
+										}
+									})
+									.then((res) => {
+										axios
+											.post('/customer/createListRemind', values)
+											.then((response) => {
+												console.log(response);
+												this.fetchData();
+												toastSuccess('Thêm tên gợi nhớ thành công');
+											})
+											.catch((error) => {
+												console.log(error);
+												toastError(
+													'Số tài khoản đã tồn tại trong danh sách hoặc số tài khoản không đúng'
+												);
+											});
+									})
+									.catch((error) => {
+										toastError('Không tồn tại tài khoản này');
+									});
+							}
+							if (values.bank === 'PGPBANK') {
+								axios
+									.post('/bank/checkPgpCustomer', {
+										data: {
+											usernameID: Number(values.stk)
+										}
+									})
+									.then((res) => {
+										axios
+											.post('/customer/createListRemind', values)
+											.then((response) => {
+												console.log(response);
+												this.fetchData();
+												toastSuccess('Thêm tên gợi nhớ thành công');
+											})
+											.catch((error) => {
+												console.log(error);
+												toastError(
+													'Số tài khoản đã tồn tại trong danh sách hoặc số tài khoản không đúng'
+												);
+											});
+									})
+									.catch((error) => {
+										toastError('Không tồn tại tài khoản này');
+									});
+							}
 						}}
 					>
 						<Row>
@@ -276,7 +339,7 @@ export default class ListReceiver extends React.Component {
 								>
 									<Input placeholder="4356343256" />
 								</Form.Item>
-								<Form.Item
+								{/* <Form.Item
 									name="bank"
 									label="Ngân hàng:"
 									rules={[ { required: true } ]}
@@ -288,7 +351,7 @@ export default class ListReceiver extends React.Component {
 										<Option value="PGPBANK">PGPBANK</Option>
 										<Option value="RGPBANK">RGPBANK</Option>
 									</Select>
-								</Form.Item>
+								</Form.Item> */}
 							</Form>
 						</Spin>
 					</Modal>
