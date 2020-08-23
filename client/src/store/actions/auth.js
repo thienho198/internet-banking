@@ -58,7 +58,15 @@ export const authLogin = (data, history) => {
 					placement: 'bottom'
 				});
 				dispatch(authSuccess(result.data));
-				history.push('/transfer-customer');
+				if (result.data.userAccess === 'customer') {
+					history.push('/transfer-customer');
+				}
+				if (result.data.userAccess === 'admin') {
+					history.push('/history-exchange');
+				}
+				if (result.data.userAccess === 'employee') {
+					history.push('/create-account-customer');
+				}
 			})
 			.catch((err) => {
 				notification.error({
