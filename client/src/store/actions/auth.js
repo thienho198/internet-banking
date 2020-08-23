@@ -47,16 +47,18 @@ export const authLogout = () => {
 export const authLogin = (data, history) => {
 	return (dispatch) => {
 		dispatch(authStart());
+
 		axios
 			.post('/auth/login', data)
 			.then((result) => {
 				myStorage.setItem('refreshToken', result.data.refreshToken);
-				history.push('/');
+
 				notification.success({
 					message: 'Đăng nhập thành công',
 					placement: 'bottom'
 				});
 				dispatch(authSuccess(result.data));
+				history.push('/transfer-customer');
 			})
 			.catch((err) => {
 				notification.error({

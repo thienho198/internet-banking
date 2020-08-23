@@ -13,9 +13,9 @@ const NavigationItems = (props) => {
 	console.log(isAuthenticated);
 	return (
 		<ul className={classes.navigationItems}>
-			<NavigationItem link="/" exact>
+			{/* <NavigationItem link="/" exact>
 				Trang chủ
-			</NavigationItem>
+			</NavigationItem> */}
 			{isAuthenticated ? access === 'customer' ? (
 				<React.Fragment>
 					<NavigationItem link="/history-customer">Lịch Sử Giao Dịch</NavigationItem>
@@ -40,7 +40,7 @@ const NavigationItems = (props) => {
 								name: 'Đăng xuất',
 								url: () => {
 									props.logout();
-									props.history.push('/');
+									props.history.push('/login');
 									toastSuccess('Đăng xuất thành công');
 								}
 							}

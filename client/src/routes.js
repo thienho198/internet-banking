@@ -11,12 +11,12 @@ const ForgotPassword = lazy(() => import('./modules/forgotPassword/ForgotPasswor
 const ResetPassword = lazy(() => import('./modules/forgotPassword/ResetPassword'));
 
 export default [
-	{ id: '/', component: Home, rights: [], exact: true },
+	// { id: '/', component: Home, rights: [], exact: true },
 	{ id: '/login', component: Login, rights: [], exact: true },
 	{ id: '/forgot-password', component: ForgotPassword, rights: [], exact: true },
 	{ id: '/auth/resetpassword/:token', component: ResetPassword, rights: [], exact: true },
 	...CustomerRouter,
 	...EmployeeRouter,
-	...AdminRouter,
-	{ id: '*', component: NotFound, rights: [] }
+	...AdminRouter
+	// { id: '*', component: NotFound, rights: [] }
 ];

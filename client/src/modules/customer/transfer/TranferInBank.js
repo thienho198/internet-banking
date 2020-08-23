@@ -13,6 +13,7 @@ import { connect } from 'react-redux';
 import axios from '../../../axios/mainAxios';
 import classes from './transferInBank.module.css';
 import { toastSuccess, toastError } from '../../../util/AppUtil';
+import _ from 'lodash';
 
 const { Step } = Steps;
 const { Option } = Select;
@@ -49,7 +50,7 @@ class TransferInBank extends React.Component {
 					if (this.bankName === 'PGP') {
 						listAccountRemind = listAccountRemind.filter((item) => item.bank === 'PGPBANK');
 					} else {
-						listAccountRemind = listAccountRemind.filter((item) => item.bank === 'RSABANK');
+						listAccountRemind = listAccountRemind.filter((item) => item.bank === 'RGPBANK');
 					}
 				}
 				this.setState({ listAccountRemind: listAccountRemind, isFormEditLoading: false });
@@ -61,7 +62,10 @@ class TransferInBank extends React.Component {
 			});
 	};
 	checkIfExistAcountInRemind = (stk) => {
-		return this.state.listAccountRemind.some((item) => item.stk == stk);
+		console.log('stk', stk);
+		console.log('list', this.state.listAccountRemind);
+		const result = this.state.listAccountRemind.some((item) => item.stk == stk);
+		return result;
 	};
 	//#region events
 
@@ -115,9 +119,27 @@ class TransferInBank extends React.Component {
 							<div className={classes.imageSuccess} />
 							<p className={classes.titleSuccess}>Giao dịch thành công</p>
 							<div>
-								<Link to={'/'} style={{ marginRight: '10px' }}>
-									Trang chủ
-								</Link>
+								<div
+									style={{
+										marginRight: '10px',
+										display: 'inline-block',
+										color: 'green',
+										cursor: 'pointer'
+									}}
+									onClick={() => {
+										console.log('im here');
+										this.dataPost = { type: 'inBank', bankName: 'PGP' };
+										this.bankName = 'PGP';
+										this.setState(
+											{ currentStep: 0, isFinishedTransfer: false, otp: '', type: 'inBank' },
+											() => {
+												this.formRef.current.resetFields();
+											}
+										);
+									}}
+								>
+									Giao dịch khác
+								</div>
 								<Link to={'/history-customer'}>Lịch sử giao dịch</Link>
 							</div>
 						</div>
@@ -374,11 +396,23 @@ class TransferInBank extends React.Component {
 																		...values,
 																		name: response.data.data.clientName
 																	};
-																	this.setState({
-																		formOneLoading: false,
-																		dataPost: values,
-																		currentStep: 1
-																	});
+																	axios
+																		.get('/customer/getListRemind')
+																		.then((res) => {
+																			this.setState({
+																				listAccountRemind:
+																					res.data.listAccountRemind,
+																				formOneLoading: false,
+																				dataPost: values,
+																				currentStep: 1
+																			});
+																		})
+																		.catch((err) => {
+																			toastError('Lỗi hệ thống');
+																			this.setState({
+																				formOneLoading: false
+																			});
+																		});
 																} else {
 																	this.setState({
 																		formOneLoading: false
@@ -413,11 +447,23 @@ class TransferInBank extends React.Component {
 																		...values,
 																		name: response.data.data.name
 																	};
-																	this.setState({
-																		formOneLoading: false,
-																		dataPost: values,
-																		currentStep: 1
-																	});
+																	axios
+																		.get('/customer/getListRemind')
+																		.then((res) => {
+																			this.setState({
+																				listAccountRemind:
+																					res.data.listAccountRemind,
+																				formOneLoading: false,
+																				dataPost: values,
+																				currentStep: 1
+																			});
+																		})
+																		.catch((err) => {
+																			toastError('Lỗi hệ thống');
+																			this.setState({
+																				formOneLoading: false
+																			});
+																		});
 																} else {
 																	this.setState({ formOneLoading: false });
 																	toastError('Số tài khoản không tồn tại');
@@ -439,12 +485,22 @@ class TransferInBank extends React.Component {
 													.post('/payment/getCustomer', values)
 													.then((response) => {
 														this.dataPost = { ...values, name: response.data.data.name };
-														this.setState({
-															formOneLoading: false,
-															dataPost: values,
-															currentStep: 1
-														});
-														console.log(response);
+														axios
+															.get('/customer/getListRemind')
+															.then((res) => {
+																this.setState({
+																	listAccountRemind: res.data.listAccountRemind,
+																	formOneLoading: false,
+																	dataPost: values,
+																	currentStep: 1
+																});
+															})
+															.catch((err) => {
+																toastError('Lỗi hệ thống');
+																this.setState({
+																	formOneLoading: false
+																});
+															});
 													})
 													.catch((error) => {
 														console.log(error);
@@ -513,23 +569,25 @@ class TransferInBank extends React.Component {
 															axios.post('/customer/createListRemind', {
 																stk: this.dataPost.stk,
 																nameRemind: this.dataPost.name,
-																bankName: 'PGPBANK'
+																bank: 'PGPBANK'
 															});
 														}
 													})
 													.catch((err) => {
 														console.log(err);
-														toastError('Sai mã OTP');
+														toastError(_.get(err, 'response.data.err'));
 														this.setState({ formOneLoading: false });
 													});
 											}
 											if (this.dataPost.bankName === 'RSA') {
 												axios
 													.post('/bank/bankTransferRgp', {
-														des_username: Number(this.dataPost.stk),
-														value: Number(this.dataPost.amountOfMoney),
-														message: this.dataPost.message,
-														otpcode: Number(this.state.otp)
+														data: {
+															des_username: Number(this.dataPost.stk),
+															value: Number(this.dataPost.amountOfMoney),
+															message: this.dataPost.message,
+															otpcode: Number(this.state.otp)
+														}
 													})
 													.then((response) => {
 														this.setState({
@@ -544,13 +602,13 @@ class TransferInBank extends React.Component {
 															axios.post('/customer/createListRemind', {
 																stk: this.dataPost.stk,
 																nameRemind: this.dataPost.name,
-																bankName: 'RGPBANK'
+																bank: 'RGPBANK'
 															});
 														}
 													})
 													.catch((err) => {
 														console.log(err);
-														toastError('Sai mã OTP');
+														toastError(_.get(err, 'response.data.err'));
 														this.setState({ formOneLoading: false });
 													});
 											}
@@ -566,7 +624,7 @@ class TransferInBank extends React.Component {
 														formOneLoading: false
 													});
 													toastSuccess('Chuyển khoản thành công');
-													debugger;
+
 													if (
 														!this.checkIfExistAcountInRemind(this.dataPost.stk) &&
 														this.saveAccount
@@ -574,13 +632,13 @@ class TransferInBank extends React.Component {
 														axios.post('/customer/createListRemind', {
 															stk: this.dataPost.stk,
 															nameRemind: this.dataPost.name,
-															bankName: 'G16BANK'
+															bank: 'G16BANK'
 														});
 													}
 												})
 												.catch((err) => {
 													console.log(err);
-													toastError('Tài khoản không đủ hoặc sai mã OTP');
+													toastError(_.get(err, 'response.data.err'));
 													this.setState({ formOneLoading: false });
 												});
 										}

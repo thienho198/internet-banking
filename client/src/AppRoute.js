@@ -1,10 +1,11 @@
-import React, { Suspense } from 'react';
+import React, { Suspense, lazy } from 'react';
 import { connect } from 'react-redux';
-import { Switch, Route } from 'react-router-dom';
+import { Switch, Route, Redirect } from 'react-router-dom';
 
 import routes from './routes';
 import { checkRight } from './util/RightUtil';
 import Loading from './components/loading/Loading';
+const NotFound = lazy(() => import('./modules/notFound/NotFound'));
 
 const AppRoute = ({ userRights }) => {
 	//bulid routes
@@ -14,6 +15,10 @@ const AppRoute = ({ userRights }) => {
 		<Suspense fallback={Loading}>
 			<Switch>
 				{filterRoutes.map((route) => <Route path={route.id} component={route.component} exact={route.exact} />)}
+				<Redirect from="/" to="/login" />
+				<Route>
+					<NotFound />
+				</Route>
 			</Switch>
 		</Suspense>
 	);
