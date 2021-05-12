@@ -27,7 +27,7 @@
     "mongodb": "^3.5.7",
     "mongoose": "^5.9.13",
     "mongoose-unique-validator": "^2.0.3",
-    "nodemailer": "^6.4.10",
+    "nodemailer": "^6.4.16",
     "nodemailer-handlebars": "^1.0.1",
     "nodemailer-smtp-transport": "^2.7.4",
     "openpgp": "^4.10.4",
